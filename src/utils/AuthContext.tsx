@@ -1,65 +1,73 @@
-// 'use client';
-// import { useRouter } from 'next/navigation';
-// import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+// 'use client'; // Ensure this is marked as client-side
 
+// import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+// import { useRouter } from 'next/navigation';
 
 // type AuthContextType = {
 //   isLoggedIn: boolean;
 //   role: string | null;
-//   logIn: (token: string, role: string) => void;
+//   profilePicture: string | null;
+//   logIn: (token: string, role: string, profilePicture: string) => void;
 //   logOut: () => void;
 // };
 
 // const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+
 //   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 //   const [role, setRole] = useState<string | null>(null);
+//   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+//   const [loading, setLoading] = useState<boolean>(true);
 //   const router = useRouter();
 
-//   // Check if the user is already logged in from local storage when the app loads
 //   useEffect(() => {
 //     const token = localStorage.getItem('token');
 //     const savedRole = localStorage.getItem('role');
+//     const savedProfilePicture = localStorage.getItem('profilePicture');
 
 //     if (token && savedRole) {
 //       setIsLoggedIn(true);
 //       setRole(savedRole);
+//       setProfilePicture(savedProfilePicture);
+//     } else {
+//       setIsLoggedIn(false);
+//       setRole(null);
+//       setProfilePicture(null);
 //     }
+//     setLoading(false);
 //   }, []);
 
-//   const logIn = (token: string, role: string) => {
-//     // Store token and role in local storage
+//   const logIn = (token: string, role: string, profilePicture: string) => {
 //     localStorage.setItem('token', token);
 //     localStorage.setItem('role', role);
+//     localStorage.setItem('profilePicture', profilePicture);
 
 //     setIsLoggedIn(true);
 //     setRole(role);
+//     setProfilePicture(profilePicture);
 
-//     // Redirect based on the role
 //     if (role === 'admin') {
-//       router.push('/adminDashboard');
+//       router.push('/aDashboard');
 //     } else if (role === 'user') {
 //       router.push('/userDashboard');
-//     } else {
-//       router.push('/login'); // In case of an invalid role
 //     }
 //   };
 
 //   const logOut = () => {
-//     // Clear local storage and reset state
 //     localStorage.removeItem('token');
 //     localStorage.removeItem('role');
+//     localStorage.removeItem('profilePicture');
 //     setIsLoggedIn(false);
 //     setRole(null);
+//     setProfilePicture(null);
 
-//     // Redirect to the login page
 //     router.push('/login');
 //   };
 
 //   return (
-//     <AuthContext.Provider value={{ isLoggedIn, role, logIn, logOut }}>
-//       {children}
+//     <AuthContext.Provider value={{ isLoggedIn, role, profilePicture, logIn, logOut }}>
+//       {!loading && children}
 //     </AuthContext.Provider>
 //   );
 // };
@@ -75,80 +83,118 @@
 
 
 
-'use client';
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useRouter } from "next/navigation";
 
-type AuthContextType = {
-  isLoggedIn: boolean;
-  role: string | null;
-  logIn: (token: string, role: string) => void;
-  logOut: () => void;
+// Define the UserType with all the properties you want to store
+type UserType = {
+  id: string;
+  name: string;
+  email: string;
+  address?: string;
+  phone?: string;
+  role:string;
+  bio?: string;
+  profilePicture: string | null;
 };
 
+// Define the AuthContextType
+type AuthContextType = {
+  isLoggedIn: boolean;
+  user: UserType | null;
+  logIn: (token: string, user: UserType) => void;
+  logOut: () => void;
+  fetchUserData: (userId: string) => Promise<void>; // Add fetchUserData here
+};
+
+// Create the context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// AuthProvider component to wrap the application
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [role, setRole] = useState<string | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
+  // Fetch user data from localStorage when the component mounts
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const savedRole = localStorage.getItem('role');
+    const token = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
 
-    if (token && savedRole) {
-      console.log("Role found in localStorage during initial load:", savedRole);  // Add this log
+    if (token && savedUser) {
       setIsLoggedIn(true);
-      setRole(savedRole);
+      setUser(JSON.parse(savedUser)); // Parse user object from localStorage
+    } else {
+      setIsLoggedIn(false);
+      setUser(null);
     }
+    setLoading(false);
   }, []);
 
-  useEffect(() => {
-    if (isLoggedIn && role) {
-      console.log("Redirecting based on role during useEffect:", role);  // Add this log
-      if (role === 'admin') {
-        router.replace('/adminDashboard');
-      } else if (role === 'user') {
-        router.replace('/userDashboard');
-      }
+
+
+// Function to fetch latest user data from the backend
+const fetchUserData = async (userId: string) => {
+  try {
+    const response = await fetch(`http://localhost:5000/api/user/${userId}`);
+    const data = await response.json();
+    if (response.ok) {
+      setUser(data.user); // Update the user in context
+      localStorage.setItem("user", JSON.stringify(data.user)); // Update localStorage
+    } else {
+      console.error("Failed to fetch user data");
     }
-  }, [isLoggedIn, role, router]);
+  } catch (error) {
+    console.error("Error fetching user data", error);
+  }
+};
 
-  const logIn = (token: string, role: string) => {
-    console.log("Setting token and role in logIn:", token, role);  // Add this log
-    // Store token and role in local storage
-    localStorage.setItem('token', token);
-    localStorage.setItem('role', role);
 
-    // Update state
+
+
+
+
+  // Login function to set the token and user data in localStorage and state
+  const logIn = (token: string, userData: UserType) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData)); // Store user data in localStorage
+
     setIsLoggedIn(true);
-    setRole(role);
+    setUser(userData);
+
+    // Redirect based on role
+    if (userData.role === "admin") {
+      router.push("/adminDashboard");
+    } else {
+      router.push("/userDashboard");
+    }
   };
 
+  // Logout function to clear localStorage and reset state
   const logOut = () => {
-    console.log("Logging out and clearing storage.");  // Add this log
-    // Clear local storage and reset state
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setIsLoggedIn(false);
-    setRole(null);
+    setUser(null);
 
-    // Redirect to the login page
-    router.push('/login');
+    router.push("/login");
   };
 
+  // Provide the AuthContext to children components
   return (
-    <AuthContext.Provider value={{ isLoggedIn, role, logIn, logOut }}>
-      {children}
+    <AuthContext.Provider value={{ isLoggedIn, user, logIn, logOut,fetchUserData  }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
 
+// Hook to access the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

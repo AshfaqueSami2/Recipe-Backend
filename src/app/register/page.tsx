@@ -1,6 +1,6 @@
-"use client";
+'use client';
 import registerBanner from "./../../assets/loginpage.jpg";
-import { useAuth } from "@/src/utils/AuthContext";
+import { useRouter } from 'next/navigation';
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -12,8 +12,9 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [address, setAddress] = useState<string>("");
+  const [profilePicture, setProfilePicture] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const { logIn } = useAuth();
+  const router = useRouter(); // Access Next.js router for navigation
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,33 +32,28 @@ const Register: React.FC = () => {
           password,
           phoneNumber,
           address,
+          profilePicture,  // Send profile picture URL
           role: "user", // Default role set as "user"
         }),
       });
 
       const data = await response.json();
-      // Check for error sources in the response
-      if (data.errorSources) {
-        const errorMessages = data.errorSources
-          .map((error: any) => error.message)
-          .join(", ");
-        throw new Error(errorMessages); // Throw an error with the combined message
-      }
 
       // Handle unsuccessful response
       if (!response.ok) {
         throw new Error(data.message || "Registration failed");
       }
 
-      // If registration is successful
-      logIn(data.token, data.role);
-      toast.success("Registration successful!");
+      toast.success("Registration successful! Please log in.");
+      
+      // Redirect to login page after successful registration
+      router.push('/login');
     } catch (error: any) {
-      // Set the error state and show the error as a toast
       setError(error.message);
       toast.error(error.message);
     }
   };
+
   return (
     <section className="flex flex-col md:flex-row h-screen items-center">
       <div className="bg-indigo-600 hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
@@ -140,6 +136,17 @@ const Register: React.FC = () => {
               />
             </div>
 
+            <div className="mt-4">
+              <label className="block text-gray-700">Profile Picture</label>
+              <input
+                type="text"
+                placeholder="Enter Profile Picture URL"
+                className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
+                value={profilePicture}
+                onChange={(e) => setProfilePicture(e.target.value)}
+              />
+            </div>
+
             <button
               type="submit"
               className="w-full block bg-[#F4A563] hover:bg-[#F09030] focus:bg-indigo-400 text-white font-semibold rounded-lg px-4 py-3 mt-6"
@@ -152,10 +159,7 @@ const Register: React.FC = () => {
 
           <p className="mt-8">
             Already have an account?{" "}
-            <Link
-              href="/login"
-              className="text-blue-500 hover:text-blue-700 font-semibold"
-            >
+            <Link href="/login" className="text-blue-500 hover:text-blue-700 font-semibold">
               Log in
             </Link>
           </p>
