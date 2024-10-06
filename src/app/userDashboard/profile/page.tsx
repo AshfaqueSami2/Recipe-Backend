@@ -1,16 +1,36 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useAuth } from "@/src/utils/AuthContext"; // Access the context
+import { useAuth } from "@/src/utils/AuthContext";
 import { useRouter } from "next/navigation";
 import PrivateRoute from "@/src/utils/privateRoute";
-import { toast } from "sonner"; // Assuming you want to show toast notifications for success/error messages
-import { motion } from "framer-motion"; // Import framer-motion
+import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 const Profile: React.FC = () => {
   const { user, isLoggedIn } = useAuth();
   const router = useRouter();
-  const [editMode, setEditMode] = useState(false); // Controls edit mode
+  const [editMode, setEditMode] = useState(false);
+
+  // Initialize state from localStorage if available
+  const [followerCount, setFollowerCount] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      return parsedUser.followers ? parsedUser.followers.length : 0;
+    }
+    return 0;
+  });
+
+  const [followingCount, setFollowingCount] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      return parsedUser.following ? parsedUser.following.length : 0;
+    }
+    return 0;
+  });
+
   const [formData, setFormData] = useState({
     phone: user?.phone || "",
     bio: user?.bio || "",
@@ -23,6 +43,28 @@ const Profile: React.FC = () => {
       router.push("/login");
     }
   }, [isLoggedIn, router]);
+
+  // Fetch the latest user data from the server and store it in localStorage and useState
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/user/${user._id}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        localStorage.setItem("user", JSON.stringify(updatedUser)); // Store the latest user data in localStorage
+        setFollowerCount(updatedUser.followers ? updatedUser.followers.length : 0);  // Update follower count in state
+        setFollowingCount(updatedUser.following ? updatedUser.following.length : 0);  // Update following count in state
+      } else {
+        throw new Error("Failed to fetch user data");
+      }
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+  };
 
   // Handle input change for editable fields
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -44,8 +86,11 @@ const Profile: React.FC = () => {
       });
 
       if (response.ok) {
+        const updatedUser = await response.json();
+        localStorage.setItem("user", JSON.stringify(updatedUser)); // Update localStorage with the latest user data
         toast.success("Profile updated successfully!");
-        setEditMode(false); // Exit edit mode after successful save
+        setEditMode(false);
+        fetchUserData();  // Re-fetch and update the latest user data after saving
       } else {
         toast.error("Failed to update profile. Please try again.");
       }
@@ -55,10 +100,9 @@ const Profile: React.FC = () => {
   };
 
   if (!user) {
-    return <p>Loading...</p>; // Show a loading state if user data is not available yet
+    return <p>Loading...</p>;
   }
 
-  // Framer Motion animation variants
   const cardVariants = {
     hidden: { opacity: 0, scale: 0.10 },
     visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: "easeOut" } },
@@ -67,14 +111,12 @@ const Profile: React.FC = () => {
   return (
     <PrivateRoute allowedRoles={["user"]}>
       <div className="flex justify-center items-center min-h-screen p-6">
-        {/* Motion Animated Card */}
         <motion.div
           initial="hidden"
           animate="visible"
           variants={cardVariants}
           className="w-full max-w-3xl bg-white shadow-xl rounded-2xl p-10"
         >
-          {/* Profile Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">My Profile</h1>
             <div className="relative">
@@ -88,7 +130,12 @@ const Profile: React.FC = () => {
             <p className="text-lg text-gray-500">{user.email}</p>
           </div>
 
-          {/* Account Information */}
+          {/* Follower and Following Count */}
+          <div className="text-center mb-4">
+            <p className="text-lg text-gray-500">Followers: {followerCount}</p>
+            <p className="text-lg text-gray-500">Following: {followingCount}</p>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div>
               <h2 className="text-xl font-semibold text-gray-700 mb-4">Account Information</h2>
@@ -136,7 +183,6 @@ const Profile: React.FC = () => {
               </div>
             </div>
 
-            {/* Address and Bio */}
             <div>
               <h2 className="text-xl font-semibold text-gray-700 mb-4">Additional Information</h2>
               {editMode ? (
@@ -187,7 +233,6 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
-          {/* Edit and Save Buttons */}
           <div className="flex justify-end mt-8 space-x-4">
             {!editMode ? (
               <button
