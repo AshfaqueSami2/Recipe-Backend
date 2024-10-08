@@ -314,8 +314,6 @@
 
 // export default RecipeDetails;
 
-
-
 "use client"; // Ensure this is set for Next.js client-side components
 
 import { useState, useEffect } from "react";
@@ -349,7 +347,7 @@ const RecipeDetails = ({ params }: { params: { recipeId: string } }) => {
       );
     });
 
-    socket.on(`commentDeleted`, (deletedCommentId) => {
+    socket.on("commentDeleted", (deletedCommentId) => {
       setComments((prevComments) =>
         prevComments.filter((comment) => comment._id !== deletedCommentId)
       );
@@ -454,60 +452,64 @@ const RecipeDetails = ({ params }: { params: { recipeId: string } }) => {
 
     const token = localStorage.getItem("token");
     if (!token) {
-        setError("You need to be logged in to update a comment.");
-        return;
+      setError("You need to be logged in to update a comment.");
+      return;
     }
 
     try {
-        // Optimistically update the comment in the UI
-        const updatedComments = comments.map((comment) =>
-            comment._id === editCommentId ? { ...comment, comment: editCommentContent } : comment
-        );
-        setComments(updatedComments);
-        setEditCommentId(null);
-        setEditCommentContent("");
+      // Optimistically update the comment in the UI
+      const updatedComments = comments.map((comment) =>
+        comment._id === editCommentId
+          ? { ...comment, comment: editCommentContent }
+          : comment
+      );
+      setComments(updatedComments);
+      setEditCommentId(null);
+      setEditCommentContent("");
 
-        // Send the update request to the server
-        const response = await axios.put(
-            `http://localhost:5000/api/recipes/${recipeId}/comment/${editCommentId}`,
-            { comment: editCommentContent },
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
-
-        // Check the response status, assuming 200 is success
-        if (response.status === 200) {
-            // Successful update, do nothing extra as the UI is already updated optimistically
-            setError(null); // Clear any previous error
-        } else {
-            // Handle unexpected status codes
-            console.error("Unexpected response status:", response.status);
-            setError("Failed to update comment. Please refresh to verify.");
+      // Send the update request to the server
+      const response = await axios.put(
+        `http://localhost:5000/api/recipes/${recipeId}/comment/${editCommentId}`,
+        { comment: editCommentContent },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-    } catch (error: any) {
-        // Log the error details for debugging
-        console.error("Error updating comment:", error);
+      );
 
-        // Only set the error if there's an actual failure, not a silent issue like a network glitch
+      // Check the response status, assuming 200 is success
+      if (response.status === 200) {
+        // Successful update, do nothing extra as the UI is already updated optimistically
+        setError(null); // Clear any previous error
+      } else {
+        // Handle unexpected status codes
+        console.error("Unexpected response status:", response.status);
         setError("Failed to update comment. Please refresh to verify.");
+      }
+    } catch (error: any) {
+      // Log the error details for debugging
+      console.error("Error updating comment:", error);
+
+      // Only set the error if there's an actual failure, not a silent issue like a network glitch
+      setError("Failed to update comment. Please refresh to verify.");
     }
-};
+  };
 
-
+  //delete
   const handleDeleteComment = async (commentId: string) => {
     const token = localStorage.getItem("token");
+
     if (!token) {
       setError("You need to be logged in to delete a comment.");
       return;
     }
 
-    // Optimistically remove the comment from the UI
-    setComments((prevComments) =>
-      prevComments.filter((comment) => comment._id !== commentId)
+    // Optimistically remove the comment from the UI before the server responds
+    const updatedComments = comments.filter(
+      (comment) => comment._id !== commentId
     );
+    setComments(updatedComments);
 
     try {
       const response = await axios.delete(
@@ -519,11 +521,21 @@ const RecipeDetails = ({ params }: { params: { recipeId: string } }) => {
         }
       );
 
-      if (response.status !== 200) {
-        throw new Error("Failed to delete comment.");
+      if (response.status === 200) {
+        // Comment deleted successfully, you might not need to do anything here
+        setError(null); // Clear any previous error
+      } else {
+        // Handle unexpected status codes
+        console.error("Unexpected response status:", response.status);
+        setError("Failed to delete comment. Please try again.");
+        // If the delete fails, rollback the optimistic update
+        setComments([...updatedComments, ...comments]);
       }
     } catch (error: any) {
-      setError("Failed to delete comment. Please refresh to verify.");
+      console.error("Error deleting comment:", error);
+      setError("Failed to delete comment. Please try again.");
+      // Rollback the optimistic update on failure
+      setComments([...updatedComments, ...comments]);
     }
   };
 
@@ -584,12 +596,17 @@ const RecipeDetails = ({ params }: { params: { recipeId: string } }) => {
             <div className="comments-list mb-4">
               {Array.isArray(comments) && comments.length > 0 ? (
                 comments.map((comment) => (
-                  <div key={comment._id} className="mb-2 p-2 bg-gray-100 rounded">
+                  <div
+                    key={comment._id}
+                    className="mb-2 p-2 bg-gray-100 rounded"
+                  >
                     {editCommentId === comment._id ? (
                       <form onSubmit={handleUpdateComment}>
                         <textarea
                           value={editCommentContent}
-                          onChange={(e) => setEditCommentContent(e.target.value)}
+                          onChange={(e) =>
+                            setEditCommentContent(e.target.value)
+                          }
                           className="w-full p-2 border rounded"
                         />
                         <button

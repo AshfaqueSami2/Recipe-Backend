@@ -63,6 +63,7 @@ const Navbar1: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
   const { isLoggedIn, logOut, user } = useAuth();
   const dashboardRoute = user?.role === 'admin' ? '/adminDashboard' : '/userDashboard';
+  const ProfileRoute = user?.role === 'admin' ? '/adminDashboard/profile' : '/userDashboard/profile';
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!isMobileMenuOpen);
@@ -162,7 +163,7 @@ const Navbar1: React.FC = () => {
                           Dashboard
                         </Link>
                         <Link
-                          href={`/userDashboard/profile`}
+                          href={ProfileRoute}
                           className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                         >
                           My Profile

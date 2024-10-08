@@ -1,16 +1,17 @@
-'use client'
+"use client";
 import PrivateRoute from "@/src/utils/privateRoute";
 import React from "react";
-import { useAuth } from "@/src/utils/AuthContext";// Import useAuth to get the user's role
+import { useAuth } from "@/src/utils/AuthContext"; // Import useAuth to get the user's role
 import Link from "next/link";
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth(); // Get the user's role from the context
- 
-  
+
   return (
-    <PrivateRoute allowedRoles={['admin']}> {/* Allow both user and admin roles */}
-       <div className="min-h-screen bg-gray-50/50">
+    <PrivateRoute allowedRoles={["admin"]}>
+      {" "}
+      {/* Allow both user and admin roles */}
+      <div className="min-h-screen bg-gray-50/50">
         {/* Sidebar */}
         <aside
           style={{ marginTop: "86px" }}
@@ -49,10 +50,8 @@ const AdminDashboard: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link  href={`/userDashboard/profile`}>
-                  <button
-                    className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all"
-                  >
+                <Link href={`/adminDashboard/profile`}>
+                  <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -66,10 +65,8 @@ const AdminDashboard: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/userDashboard/changePassword">
-                  <button
-                    className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all"
-                  >
+                <Link href="/adminDashboard/changePassword">
+                  <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -81,12 +78,8 @@ const AdminDashboard: React.FC = () => {
                     <p className="capitalize">Chnage Password</p>
                   </button>
                 </Link>
-              </li>
-              <li>
-                <Link href="/notifications">
-                  <button
-                    className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all"
-                  >
+                <Link href="/recipes/create">
+                  <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -95,7 +88,61 @@ const AdminDashboard: React.FC = () => {
                     >
                       {/* Icons */}
                     </svg>
-                    <p className="capitalize">Notifications</p>
+                    <p className="capitalize">Create Recipe</p>
+                  </button>
+                </Link>
+                <Link href="/adminDashboard/myrecipe">
+                  <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-5 h-5"
+                    >
+                      {/* Icons */}
+                    </svg>
+                    <p className="capitalize">My Recipe</p>
+                  </button>
+                </Link>
+                <Link href="/adminDashboard/createAdmin">
+                  <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-5 h-5"
+                    >
+                      {/* Icons */}
+                    </svg>
+                    <p className="capitalize">Create Admin</p>
+                  </button>
+                </Link>
+                <Link href="/adminDashboard/admins">
+                  <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-5 h-5"
+                    >
+                      {/* Icons */}
+                    </svg>
+                    <p className="capitalize">All Admins</p>
+                  </button>
+                </Link>
+              </li>
+              <li>
+                <Link href="/adminDashboard/users">
+                  <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-5 h-5"
+                    >
+                      {/* Icons */}
+                    </svg>
+                    <p className="capitalize">All Users</p>
                   </button>
                 </Link>
               </li>
