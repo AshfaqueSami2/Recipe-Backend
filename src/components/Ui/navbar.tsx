@@ -62,8 +62,12 @@ const Navbar1: React.FC = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
   const { isLoggedIn, logOut, user } = useAuth();
-  const dashboardRoute = user?.role === 'admin' ? '/adminDashboard' : '/userDashboard';
-  const ProfileRoute = user?.role === 'admin' ? '/adminDashboard/profile' : '/userDashboard/profile';
+  const dashboardRoute =
+    user?.role === "admin" ? "/adminDashboard" : "/userDashboard";
+  const ProfileRoute =
+    user?.role === "admin"
+      ? "/adminDashboard/profile"
+      : "/userDashboard/profile";
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!isMobileMenuOpen);
@@ -100,7 +104,7 @@ const Navbar1: React.FC = () => {
                 href="/"
                 className="text-gray-800 text-sm font-semibold hover:text-purple-600"
               >
-              Home
+                Home
               </Link>
               <Link
                 href="/allrecipe"
@@ -109,16 +113,22 @@ const Navbar1: React.FC = () => {
                 All Recipes
               </Link>
               <Link
-                href="#"
+                href="/aboutus"
                 className="text-gray-800 text-sm font-semibold hover:text-purple-600"
               >
-                Partners
+                About Us
               </Link>
               <Link
                 href="#"
                 className="text-gray-800 text-sm font-semibold hover:text-purple-600"
               >
                 Pricing
+              </Link>
+              <Link
+                href="/contactus"
+                className="text-gray-800 text-sm font-semibold hover:text-purple-600"
+              >
+                Contact Us
               </Link>
             </div>
 

@@ -104,6 +104,19 @@ const AdminDashboard: React.FC = () => {
                     <p className="capitalize">My Recipe</p>
                   </button>
                 </Link>
+                <Link href="/adminDashboard/recipes">
+                  <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-5 h-5"
+                    >
+                      {/* Icons */}
+                    </svg>
+                    <p className="capitalize">All Recipes</p>
+                  </button>
+                </Link>
                 <Link href="/adminDashboard/createAdmin">
                   <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
                     <svg

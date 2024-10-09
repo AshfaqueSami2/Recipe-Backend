@@ -314,6 +314,13 @@
 
 // export default RecipeDetails;
 
+
+
+
+
+
+
+
 "use client"; // Ensure this is set for Next.js client-side components
 
 import { useState, useEffect } from "react";
@@ -621,7 +628,10 @@ const RecipeDetails = ({ params }: { params: { recipeId: string } }) => {
                         <p>{comment.comment}</p>
                         <small>
                           {new Date(comment.createdAt).toLocaleString()} by{" "}
-                          {comment.user.username}
+                          {comment.user.name}
+                    {
+                      console.log(comment.user)
+                    }
                         </small>
                         {/* Edit and Delete Buttons */}
                         <div className="mt-2">
@@ -674,3 +684,10 @@ const RecipeDetails = ({ params }: { params: { recipeId: string } }) => {
 };
 
 export default RecipeDetails;
+
+
+
+
+
+
+

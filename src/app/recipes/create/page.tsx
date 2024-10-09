@@ -274,8 +274,6 @@
 
 
 
-
-
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Use the new router
@@ -306,9 +304,12 @@ const CreateRecipe: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Strip HTML tags from the description to store it as plain text
+    const plainTextDescription = description.replace(/<[^>]+>/g, ''); 
+
     const recipeData = {
       title,
-      description,
+      description: plainTextDescription, // Use the plain text description
       instructions,
       cookingTime,
       ingredients,
