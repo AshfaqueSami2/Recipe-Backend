@@ -1,35 +1,141 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# Recipe Management System
 
-First, run the development server:
+## Introduction
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+A user-friendly and responsive Recipe management system built with TypeScript. The system provides two dashboards: one for users to manage their recipe  and another for admins to manage recipe admin can publish unpublished recipe and statistics.
+
+## Project Overview
+This project allows users to easily learn cook with my website and view their own recipe  history. Administrators have access to a dedicated dashboard where they can add, edit, and delete recipe, as well as view how many upvote downvote. The system is built with a focus on responsiveness and ease of use.
+
+## Features
+ 
+ * **User Dashboard** : View and manage recipe etc.
+ * **Admin Dashboard** : Add, edit, delete sports recipe etc.
+ * **Booking Management** : Admins can view the total number of recipe .
+ * **Responsive Design** : Optimized for mobile and desktop users..
+
+ ## Technology Stack
+
+ * **FrontEnd** : TypeScript, React, TailwindCSS
+ * **State Management** : Redux Toolkit
+ * **Backend** :Node.js, Express
+ * **Database**:  MongoDB
+ * **Payment Integration**: AmarPay for booking payments(Pending)
+
+ ## Installation Guidelines(Backend)
+Ensure you have the following installed on your system:
+ * **Node.js**
+ * **MongoDB**
+
+
+
+
+ ### Installation Steps
+
+ 1. Clone the repository:
+ ```
+ git clone https://github.com/AshfaqueSami2/Recipe-Share-Frontend/
+ cd Recipe-Share-Frontend/
+ ```
+ 2. Install dependencies:
+ ```
+ npm install 
+ ```
+ 3. Create a .env file in the root directory and add the following:
+ ```
+PORT=5000
+DB_URL=your_mongo_db_connection_uri
+API_KEY=your_api_key_here
+ ```
+4. Start the development server:
+```
+npm run start:dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configuration 
+* Ensure the ```.env``` file is correctly configured for database connection and API keys.
+* Admin and user roles are managed through role-based authentication.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* **User Dashboard** : Log in to view your current bookings, check recipe upvaote downvote
 
-## Learn More
+* **Admin Dashboard**: Manage Recipe, Recipe statistics, and add/edit/delete REcipe.
 
-To learn more about Next.js, take a look at the following resources:
+# Installation Guidelines (Frontend)
+ ## Prerequisites
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+ Before starting, ensure you have the following software installed on your machine:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+ * **Node.js**: Download and install from [Node.js](https://nodejs.org/en)
+ * **npm** or **yarn**: This comes with Node.js, but ensure it's up to date:
 
-## Deploy on Vercel
+ ```
+ npm install -g npm
+```
+or if you are using yarn: 
+```
+npm install -g yarn
+```
+
+## Installation Steps
+
+1. **Clone the Repository** : First, clone the frontend repository to your local machine:
+
+
+```
+https://github.com/AshfaqueSami2/Recipe-Share-Frontend
+cd Turf-FrontEnd
+```
+
+2. **Install Dependencies** : Once you're in the project directory, install the required dependencies:
+
+```
+npm install or npm i
+```
+
+or,if you are using yarn 
+
+```
+yarn install
+```
+
+3.**Running the Development Server**: Once the dependencies are installed and the environment is set up, start the development server:
+
+```
+npm run dev
+```
+
+or with yarn:
+```
+yarn dev
+```
+
+4. **Access the Application** : Open your browser and navigate to:
+
+```
+http://localhost:3000/
+```
+
+5. **Build for Production**:  To create an optimized build for production, run:
+
+```
+npm run build
+```
+
+or with yarn:
+
+``` 
+yarn build
+```
+
+## Contributing
+ We welcome contributions! Please read our contributing guide for more details.
+
+###  Contact
+Project Maintainer: Sami
+
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
