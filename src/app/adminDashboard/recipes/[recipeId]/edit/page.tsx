@@ -1,33 +1,36 @@
-'use client'
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import dynamic from 'next/dynamic';
+"use client";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import dynamic from "next/dynamic";
 
 // Load Quill dynamically
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-import 'react-quill/dist/quill.snow.css';
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import "react-quill/dist/quill.snow.css";
 
 const EditRecipe = ({ params }: { params: { recipeId: string } }) => {
   const { recipeId } = params; // recipeId from dynamic route
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     if (recipeId) {
       // Fetch the recipe data for editing
       const fetchRecipe = async () => {
         try {
-          const token = localStorage.getItem('token');
-          const response = await axios.get(`http://localhost:5000/recipe/${recipeId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const token = localStorage.getItem("token");
+          const response = await axios.get(
+            `https://recipebackend-phi.vercel.app/recipe/${recipeId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
           setTitle(response.data.data.title);
           setDescription(response.data.data.description);
         } catch (error) {
-          console.error('Failed to fetch recipe', error);
+          console.error("Failed to fetch recipe", error);
         }
       };
 
@@ -37,16 +40,20 @@ const EditRecipe = ({ params }: { params: { recipeId: string } }) => {
 
   const handleUpdate = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`http://localhost:5000/recipe/${recipeId}`, { title, description }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      alert('Recipe updated successfully');
-      window.location.href = '/adminDashboard/recipes'; // Navigate back after update
+      const token = localStorage.getItem("token");
+      await axios.patch(
+        `https://recipebackend-phi.vercel.app/recipe/${recipeId}`,
+        { title, description },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Recipe updated successfully");
+      window.location.href = "/adminDashboard/recipes"; // Navigate back after update
     } catch (error) {
-      console.error('Failed to update recipe', error);
+      console.error("Failed to update recipe", error);
     }
   };
 
@@ -57,9 +64,14 @@ const EditRecipe = ({ params }: { params: { recipeId: string } }) => {
   return (
     <div className="container mx-auto max-w-3xl p-6 bg-white shadow-lg rounded-lg mt-10">
       <h1 className="text-3xl font-semibold text-gray-800 mb-6">Edit Recipe</h1>
-      
+
       <div className="mb-6">
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">Recipe Title</label>
+        <label
+          htmlFor="title"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Recipe Title
+        </label>
         <input
           type="text"
           id="title"
@@ -71,7 +83,12 @@ const EditRecipe = ({ params }: { params: { recipeId: string } }) => {
       </div>
 
       <div className="mb-6">
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Recipe Description</label>
+        <label
+          htmlFor="description"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Recipe Description
+        </label>
         <div className="bg-white border border-gray-300 rounded-lg">
           <ReactQuill
             value={description}

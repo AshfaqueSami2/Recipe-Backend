@@ -1,6 +1,6 @@
-'use client';
+"use client";
 import registerBanner from "./../../assets/loginpage.jpg";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -21,21 +21,24 @@ const Register: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          phoneNumber,
-          address,
-          profilePicture,  // Send profile picture URL
-          role: "user", // Default role set as "user"
-        }),
-      });
+      const response = await fetch(
+        "https://recipebackend-phi.vercel.app/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            phoneNumber,
+            address,
+            profilePicture, // Send profile picture URL
+            role: "user", // Default role set as "user"
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -45,15 +48,19 @@ const Register: React.FC = () => {
       }
 
       toast.success("Registration successful! Please log in.");
-      
+
       // Redirect to login page after successful registration
-      router.push('/login');
-    } catch (error: any) {
-      setError(error.message);
-      toast.error(error.message);
+      router.push("/login");
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+        toast.error(error.message);
+      } else {
+        setError("An unexpected error occurred.");
+        toast.error("An unexpected error occurred.");
+      }
     }
   };
-
   return (
     <section className="flex flex-col md:flex-row h-screen items-center">
       <div className="bg-indigo-600 hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
@@ -159,7 +166,10 @@ const Register: React.FC = () => {
 
           <p className="mt-8">
             Already have an account?{" "}
-            <Link href="/login" className="text-blue-500 hover:text-blue-700 font-semibold">
+            <Link
+              href="/login"
+              className="text-blue-500 hover:text-blue-700 font-semibold"
+            >
               Log in
             </Link>
           </p>

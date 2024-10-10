@@ -1,693 +1,832 @@
 // 'use client';
 
-// import { useState, useEffect } from 'react';
-// import { useRouter } from 'next/navigation'; // Correct import for useRouter in the app directory
-// import axios from 'axios';
-// import Image from 'next/image';
+// import React, { useEffect, useState } from 'react';
+// import { useRouter } from 'next/navigation'; // For navigation
+// import {jwtDecode} from 'jwt-decode'; // Import jwt-decode
+// import { motion } from 'framer-motion';
 
-// const RecipeDetails = ({ params }: { params: { recipeId: string } }) => {
-//   const router = useRouter(); // Correct useRouter from next/navigation
-//   const { recipeId } = params;
-
-//   const [recipe, setRecipe] = useState<any>(null);
-//   const [error, setError] = useState<string | null>(null);
-//   const [loading, setLoading] = useState<boolean>(true);
-
-//   useEffect(() => {
-//     const fetchRecipe = async () => {
-//       const token = localStorage.getItem('token'); // Check for token
-
-//       if (!token) {
-//         // If not logged in, redirect to login page and include redirect URL
-//         router.push(`/login?redirect=/allrecipe/${recipeId}`);
-//         return;
-//       }
-
-//       try {
-//         const response = await axios.get(`http://localhost:5000/api/recipes/${recipeId}`, {
-//           headers: {
-//             Authorization: `Bearer ${token}`, // Attach the token in the headers
-//           },
-//         });
-//         setRecipe(response.data.data); // Assuming your API response wraps data under 'data'
-//         setLoading(false);
-//       } catch (error: any) {
-//         if (error.response && error.response.status === 401) {
-//           setError('Authentication failed, please log in again.');
-//           router.push(`/login?redirect=/allrecipe/${recipeId}`);
-//         } else {
-//           setError('Failed to load recipe');
-//         }
-//         setLoading(false);
-//       }
-//     };
-
-//     if (recipeId) {
-//       fetchRecipe();
-//     }
-//   }, [recipeId, router]);
-
-//   if (loading) return <p className="text-center text-gray-600">Loading...</p>;
-//   if (error) return <p className="text-center text-red-500">{error}</p>;
-
-//   return (
-//     <div className="max-w-lg mx-auto my-8 p-6 bg-white shadow-lg rounded-lg">
-//       <h1 className="text-3xl font-bold text-center mb-4">{recipe.title}</h1>
-//       <div className="flex justify-center mb-4">
-//         <Image
-//           src={recipe.images[0]}
-//           alt={recipe.title}
-//           width={400}
-//           height={300}
-//           className="rounded-lg shadow-md"
-//         />
-//       </div>
-
-//       {/* Show content based on premium or non-premium user */}
-//       {recipe.teaser ? (
-//         <div className="text-center">
-//           <p className="text-gray-600 mb-4">{recipe.teaser}</p>
-//          <button> <p className="text-blue-500 font-semibold">Subscribe to premium to see the full recipe!</p></button>
-//         </div>
-//       ) : (
-//         <div>
-//           <p className="text-gray-700 text-lg mb-4">description: {recipe.description}</p>
-//           <p className="text-gray-600 mb-4">
-//             <strong>Cooking Time:</strong> {recipe.cookingTime} minutes
-//           </p>
-//           <p className="text-gray-600 mb-4">
-//             <strong>Tags:</strong> {recipe.tags.join(', ')}
-//           </p>
-//           <p className="text-gray-700">instructions: {recipe.instructions}</p>
-//         </div>
-//       )}
-//     </div>
-//   );
+// // Define the Recipe type
+// type Recipe = {
+//   _id: string;
+//   title: string;
+//   description: string;
+//   ingredients: string[];
+//   instructions: string;
+//   images: string[];
+//   premium: string; // yes or no
+//   message?: string; // Custom message for premium
+//   teaser?: string; // Teaser for premium recipes
 // };
 
-// export default RecipeDetails;
+// type User = {
+//   _id: string;
+//   name: string;
+//   email: string;
+//   role: 'admin' | 'user';
+//   isPremium: boolean;
+// };
 
-// "use client"; // Ensure this is set for Next.js client-side components
-
-// import { useState, useEffect } from "react";
-// import { useRouter } from "next/navigation";
-// import axios from "axios";
-// import Image from "next/image";
-// import io from "socket.io-client";
-
-// const RecipeDetails = ({ params }: { params: { recipeId: string } }) => {
-//   const router = useRouter();
-//   const { recipeId } = params;
-
-//   const [recipe, setRecipe] = useState<any>(null);
-//   const [comments, setComments] = useState<any[]>([]);
-//   const [newComment, setNewComment] = useState<string>("");
+// const RecipeDetailsPage = ({ params }: { params: { recipeId: string } }) => {
+//   const [recipe, setRecipe] = useState<Recipe | null>(null);
+//   const [loading, setLoading] = useState(true);
 //   const [error, setError] = useState<string | null>(null);
-//   const [loading, setLoading] = useState<boolean>(true);
-//   const [localCommentIds, setLocalCommentIds] = useState<Set<string>>(new Set());
+//   const [user, setUser] = useState<User | null>(null);
+//   const [comment, setComment] = useState<string>(''); // To handle comment input
+//   const router = useRouter();
+
+//   const { recipeId } = params; // Extract recipeId from params
+
+//   // Extract user info from JWT stored in localStorage
+//   useEffect(() => {
+//     const token = localStorage.getItem('token');
+//     if (token) {
+//       const decodedToken = jwtDecode<User>(token);
+//       setUser(decodedToken);
+//     } else {
+//       // Redirect to login if no token
+//       router.push('/login');
+//     }
+//   }, [router]);
 
 //   useEffect(() => {
 //     const fetchRecipe = async () => {
-//       const token = localStorage.getItem("token");
-
-//       if (!token) {
-//         router.push(`/login?redirect=/allrecipe/${recipeId}`);
-//         return;
-//       }
-
 //       try {
-//         const response = await axios.get(
-//           `http://localhost:5000/api/recipes/${recipeId}`,
-//           {
-//             headers: {
-//               Authorization: `Bearer ${token}`,
-//             },
-//           }
-//         );
-//         setRecipe(response.data.data);
-//         setComments(response.data.data.comments); // Load initial comments
-//         setLoading(false);
-//       } catch (error: any) {
-//         if (error.response && error.response.status === 401) {
-//           setError("Authentication failed, please log in again.");
-//           router.push(`/login?redirect=/allrecipe/${recipeId}`);
-//         } else {
-//           setError("Failed to load recipe");
+//         const response = await fetch(`https://recipebackend-phi.vercel.app/api/recipes/${recipeId}`, {
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem('token')}`, // Pass the token to the backend
+//           },
+//         });
+
+//         const data = await response.json();
+//         if (!response.ok) {
+//           throw new Error(data.message || 'Failed to fetch recipe');
 //         }
+
+//         setRecipe(data.data);
+//         setLoading(false);
+//       } catch (err) {
+//         setError('Failed to load recipe');
 //         setLoading(false);
 //       }
 //     };
 
-//     if (recipeId) {
-//       fetchRecipe();
-//     }
-//   }, [recipeId, router]);
+//     if (user && recipeId) fetchRecipe();
+//   }, [user, recipeId]);
 
-//   // Setup WebSocket for real-time comments
-//   useEffect(() => {
-//     const socket = io("http://localhost:5000");
+//   if (loading) return <p>Loading...</p>;
+//   if (error) return <p>{error}</p>;
 
-//     socket.on(`recipe-${recipeId}`, (newComment) => {
-//       // Avoid adding duplicate comments by checking if this comment has already been optimistically added
-//       if (!localCommentIds.has(newComment._id)) {
-//         setComments((prevComments) => [...prevComments, newComment]);
-//       }
-//     });
-
-//     return () => {
-//       socket.disconnect();
-//     };
-//   }, [recipeId, localCommentIds]);
+//   const handleSubscribeClick = () => {
+//     // Navigate to a subscription page or display a subscription modal
+//     router.push('/subscribe'); // Example of navigating to a subscription page
+//   };
 
 //   const handleCommentSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault();
 
-//     const token = localStorage.getItem("token");
-//     if (!token) {
-//       setError("You need to be logged in to comment.");
+//     if (!comment.trim()) {
+//       alert('Comment cannot be empty');
 //       return;
 //     }
 
-//     // Optimistically add the comment to the UI before sending the request
-//     const tempComment = {
-//       _id: `temp-${Date.now()}`, // Use a temporary ID
-//       comment: newComment,
-//       createdAt: new Date().toISOString(),
-//       user: { _id: "temp-user-id", username: "You" }, // Fake user data for now
-//     };
-
-//     // Add the temporary comment to the list and track its ID
-//     setComments((prevComments) => [...prevComments, tempComment]);
-//     setLocalCommentIds((prevIds) => new Set(prevIds).add(tempComment._id));
-//     setNewComment("");
-
 //     try {
-//       const response = await axios.post(
-//         `http://localhost:5000/api/recipes/${recipeId}/comment`,
-//         { comment: newComment },
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         }
-//       );
-
-//       if (response.status === 200 || response.status === 201) {
-//         // Replace the temporary comment with the real one by filtering out the temporary one
-//         const updatedComments = comments.filter(
-//           (c) => c._id !== tempComment._id
-//         );
-//         const realComment = response.data.data.comments.slice(-1)[0]; // Get the last comment
-
-//         // Update the comments list with the real comment
-//         setComments([...updatedComments, realComment]);
-
-//         // Update the local comment IDs set with the new real comment ID
-//         setLocalCommentIds((prevIds) => new Set(prevIds).add(realComment._id));
-//       } else {
-//         throw new Error("Failed to post comment.");
-//       }
-//     } catch (error: any) {
-//       // Remove the optimistically added comment if there's an error
-//       setComments((prevComments) =>
-//         prevComments.filter((comment) => comment._id !== tempComment._id)
-//       );
-//       setLocalCommentIds((prevIds) => {
-//         const updatedIds = new Set(prevIds);
-//         updatedIds.delete(tempComment._id);
-//         return updatedIds;
+//       const response = await fetch(`https://recipebackend-phi.vercel.app/api/recipes/${recipeId}/comment`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: `Bearer ${localStorage.getItem('token')}`,
+//         },
+//         body: JSON.stringify({ comment }),
 //       });
-//       setError("Failed to post comment. Please try again.");
+
+//       if (!response.ok) {
+//         throw new Error('Failed to submit comment');
+//       }
+
+//       const updatedRecipe = await response.json();
+//       setRecipe(updatedRecipe.data); // Update recipe with new comment
+//       setComment(''); // Reset comment input
+//     } catch (err) {
+//       alert('Failed to submit comment');
 //     }
 //   };
 
-//   if (loading) return <p className="text-center text-gray-600">Loading...</p>;
-//   if (error) return <p className="text-center text-red-500">{error}</p>;
-
 //   return (
-//     <div className="max-w-lg mx-auto my-8 p-6 bg-white shadow-lg rounded-lg">
-//       <h1 className="text-3xl font-bold text-center mb-4">{recipe.title}</h1>
-//       <div className="flex justify-center mb-4">
-//         {recipe.images && recipe.images.length > 0 && (
-//           <Image
-//             src={recipe.images[0]}
-//             alt={recipe.title}
-//             width={400}
-//             height={300}
-//             className="rounded-lg shadow-md"
+//     <div className="container mx-auto px-4 py-8">
+//       <motion.h1
+//         className="text-4xl font-bold text-center mb-8"
+//         initial={{ opacity: 0 }}
+//         animate={{ opacity: 1 }}
+//         transition={{ duration: 0.5 }}
+//       >
+//         {recipe?.title}
+//       </motion.h1>
+
+//       <div className="bg-white shadow-md rounded-lg p-6 max-w-2xl mx-auto">
+//         <motion.div
+//           initial={{ y: -50, opacity: 0 }}
+//           animate={{ y: 0, opacity: 1 }}
+//           transition={{ duration: 0.5 }}
+//         >
+//           <img
+//             src={recipe?.images[0] || 'https://via.placeholder.com/150'}
+//             alt={recipe?.title}
+//             className="w-full h-48 object-cover mb-4 rounded-lg"
 //           />
-//         )}
-//       </div>
+//           <p className="text-gray-600 mb-4">{recipe?.description}</p>
 
-//       {recipe.teaser ? (
-//         <div className="text-center">
-//           <p className="text-gray-600 mb-4">{recipe.teaser}</p>
-//           <button>
-//             <p className="text-blue-500 font-semibold">
-//               Subscribe to premium to see the full recipe!
+//           {/* Premium check: If recipe is premium and user is not premium, show teaser */}
+//           {recipe?.premium === 'yes' && !user?.isPremium ? (
+//             <>
+//               <p className="text-red-500 mb-4">{recipe.message}</p>
+//               <p>{recipe.teaser}</p>
+//               <p className="text-gray-600 italic mb-6">
+//                 Subscribe to get full access to this recipe!
+//               </p>
+//               <button
+//                 onClick={handleSubscribeClick}
+//                 className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-200"
+//               >
+//                 Subscribe to get full access
+//               </button>
+//             </>
+//           ) : (
+//             <>
+//               <h2 className="text-xl font-bold mb-2">Instructions</h2>
+//               <p className="text-gray-600">{recipe?.instructions}</p>
+//             </>
+//           )}
+
+//           <h3 className="text-lg font-bold mt-6 mb-2">Ingredients</h3>
+//           <ul className="list-disc list-inside">
+//             {recipe?.ingredients && recipe.ingredients.length > 0 ? (
+//               recipe.ingredients.map((ingredient, index) => (
+//                 <li key={index} className="text-gray-600">{ingredient}</li>
+//               ))
+//             ) : (
+//               <li className="text-gray-600">No ingredients listed.</li>
+//             )}
+//           </ul>
+//         </motion.div>
+
+//         {/* Comments Section */}
+//         <div className="mt-8">
+//           <h3 className="text-lg font-bold mb-4">Comments</h3>
+//           {recipe?.comments && recipe.comments.length > 0 ? (
+//             recipe.comments.map((commentObj, index) => (
+//               <div key={index} className="border-b pb-2 mb-4">
+//                 <p className="text-gray-800"><strong>{commentObj.user.name}</strong></p>
+//                 <p className="text-gray-600">{commentObj.comment}</p>
+//               </div>
+//             ))
+//           ) : (
+//             <p>No comments yet. Be the first to comment!</p>
+//           )}
+
+//           {/* Comment Input - Only for users who are either premium or viewing free recipes */}
+//           {user?.role === 'user' && (
+//             <>
+//               {recipe?.premium === 'no' || (user.isPremium && recipe.premium === 'yes') ? (
+//                 <form onSubmit={handleCommentSubmit} className="mt-4">
+//                   <textarea
+//                     value={comment}
+//                     onChange={(e) => setComment(e.target.value)}
+//                     className="w-full p-2 border border-gray-300 rounded-lg"
+//                     placeholder="Leave a comment"
+//                   ></textarea>
+//                   <button
+//                     type="submit"
+//                     className="mt-2 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
+//                   >
+//                     Submit Comment
+//                   </button>
+//                 </form>
+//               ) : (
+//                 <button
+//                   onClick={handleSubscribeClick}
+//                   className="mt-4 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200"
+//                 >
+//                   You need a premium subscription to comment on this recipe
+//                 </button>
+//               )}
+//             </>
+//           )}
+
+//           {/* Admin can't comment */}
+//           {user?.role === 'admin' && (
+//             <p className="text-gray-600 italic mt-4">
+//               Admins cannot comment on recipes.
 //             </p>
-//           </button>
+//           )}
 //         </div>
-//       ) : (
-//         <div>
-//           <p className="text-gray-700 text-lg mb-4">
-//             <strong>Description:</strong> {recipe.description}
-//           </p>
-//           <p className="text-gray-600 mb-4">
-//             <strong>Cooking Time:</strong> {recipe.cookingTime} minutes
-//           </p>
-//           <p className="text-gray-600 mb-4">
-//             <strong>Tags:</strong> {recipe.tags.join(", ")}
-//           </p>
-//           <p className="text-gray-700 mb-4">
-//             <strong>Instructions:</strong> {recipe.instructions}
-//           </p>
-//         </div>
-//       )}
-
-//       {/* Comments Section */}
-//       <div className="comments-section mt-6">
-//   <h3 className="text-2xl font-semibold mb-4">Comments</h3>
-//   <div className="comments-list mb-4">
-//     {Array.isArray(comments) && comments.length > 0 ? (
-//       comments.map((comment, index) => (
-//         <div key={index} className="mb-2 p-2 bg-gray-100 rounded">
-//           <p>{comment.comment}</p>
-//           <small>{new Date(comment.createdAt).toLocaleString()}</small>
-//         </div>
-//       ))
-//     ) : (
-//       <p className="text-center text-gray-500">
-//         No comments yet. Be the first to comment!
-//       </p>
-//     )}
-//   </div>
-// </div>
-
-//       {/* New Comment Form */}
-//       {!recipe.isPremium && (
-//         <form onSubmit={handleCommentSubmit} className="mt-4">
-//           <textarea
-//             value={newComment}
-//             onChange={(e) => setNewComment(e.target.value)}
-//             className="w-full p-2 border rounded"
-//             placeholder="Add a comment..."
-//             rows={3}
-//           ></textarea>
-//           <button
-//             type="submit"
-//             className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
-//           >
-//             Post Comment
-//           </button>
-//         </form>
-//       )}
-
-//       {recipe.isPremium && (
-//         <p className="text-center text-gray-500">
-//           Comments are available for premium users only.
-//         </p>
-//       )}
+//       </div>
 //     </div>
 //   );
 // };
 
-// export default RecipeDetails;
+// export default RecipeDetailsPage;
 
+// 'use client';
 
+// import React, { useEffect, useState } from 'react';
+// import { useRouter } from 'next/navigation'; // For navigation
+// import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
+// import { motion } from 'framer-motion';
 
+// // Define the Recipe type
+// type Recipe = {
+//   _id: string;
+//   title: string;
+//   description: string;
+//   ingredients: string[];
+//   instructions: string;
+//   images: string[];
+//   premium: string; // yes or no
+//   message?: string; // Custom message for premium
+//   teaser?: string; // Teaser for premium recipes
+//   comments: {
+//     _id: string;
+//     user: { _id: string; name: string };
+//     comment: string;
+//     updatedAt: string;
+//   }[];
+// };
 
+// type User = {
+//   _id: string;
+//   name: string;
+//   email: string;
+//   role: 'admin' | 'user';
+//   isPremium: boolean;
+// };
 
+// const RecipeDetailsPage = ({ params }: { params: { recipeId: string } }) => {
+//   const [recipe, setRecipe] = useState<Recipe | null>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
+//   const [user, setUser] = useState<User | null>(null);
+//   const [comment, setComment] = useState<string>(''); // To handle comment input
+//   const [editingCommentId, setEditingCommentId] = useState<string | null>(null); // To track which comment is being edited
+//   const [editCommentText, setEditCommentText] = useState<string>(''); // To handle editing comment text
 
+//   const router = useRouter();
+//   const { recipeId } = params; // Extract recipeId from params
 
+//   // Extract user info from JWT stored in localStorage
+//   useEffect(() => {
+//     const token = localStorage.getItem('token');
+//     if (token) {
+//       const decodedToken = jwtDecode<User>(token);
+//       setUser(decodedToken);
+//     } else {
+//       router.push('/login');
+//     }
+//   }, [router]);
 
-"use client"; // Ensure this is set for Next.js client-side components
+//   useEffect(() => {
+//     const fetchRecipe = async () => {
+//       try {
+//         const response = await fetch(`https://recipebackend-phi.vercel.app/api/recipes/${recipeId}`, {
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem('token')}`,
+//           },
+//         });
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
-import Image from "next/image";
-import io from "socket.io-client";
+//         const data = await response.json();
+//         if (!response.ok) throw new Error(data.message || 'Failed to fetch recipe');
 
-const RecipeDetails = ({ params }: { params: { recipeId: string } }) => {
-  const router = useRouter();
-  const { recipeId } = params;
+//         setRecipe(data.data);
+//         setLoading(false);
+//       } catch (err) {
+//         setError('Failed to load recipe');
+//         setLoading(false);
+//       }
+//     };
 
-  const [recipe, setRecipe] = useState<any>(null);
-  const [comments, setComments] = useState<any[]>([]);
-  const [newComment, setNewComment] = useState<string>("");
-  const [editCommentId, setEditCommentId] = useState<string | null>(null);
-  const [editCommentContent, setEditCommentContent] = useState<string>("");
+//     if (user && recipeId) fetchRecipe();
+//   }, [user, recipeId]);
+
+//   if (loading) return <p>Loading...</p>;
+//   if (error) return <p>{error}</p>;
+
+//   const handleCommentSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!comment.trim()) return alert('Comment cannot be empty');
+
+//     try {
+//       const response = await fetch(`https://recipebackend-phi.vercel.app/api/recipes/${recipeId}/comment`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: `Bearer ${localStorage.getItem('token')}`,
+//         },
+//         body: JSON.stringify({ comment }),
+//       });
+
+//       if (!response.ok) throw new Error('Failed to submit comment');
+//       const updatedRecipe = await response.json();
+//       setRecipe(updatedRecipe.data);
+//       setComment('');
+//     } catch (err) {
+//       alert('Failed to submit comment');
+//     }
+//   };
+
+//   const handleCommentEdit = async (commentId: string) => {
+//     if (!editCommentText.trim()) return alert('Comment cannot be empty');
+
+//     try {
+//       const response = await fetch(`https://recipebackend-phi.vercel.app/api/recipes/${recipeId}/comment/${commentId}`, {
+//         method: 'PUT',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: `Bearer ${localStorage.getItem('token')}`,
+//         },
+//         body: JSON.stringify({ comment: editCommentText }),
+//       });
+
+//       if (!response.ok) throw new Error('Failed to update comment');
+//       const updatedRecipe = await response.json();
+//       setRecipe(updatedRecipe.data);
+//       setEditingCommentId(null); // Close the edit mode
+//     } catch (err) {
+//       alert('Failed to update comment');
+//     }
+//   };
+
+//   return (
+//     <div className="container mx-auto px-4 py-8">
+//       <motion.h1
+//         className="text-4xl font-bold text-center mb-8"
+//         initial={{ opacity: 0 }}
+//         animate={{ opacity: 1 }}
+//         transition={{ duration: 0.5 }}
+//       >
+//         {recipe?.title}
+//       </motion.h1>
+
+//       <div className="bg-white shadow-md rounded-lg p-6 max-w-2xl mx-auto">
+//         <motion.div
+//           initial={{ y: -50, opacity: 0 }}
+//           animate={{ y: 0, opacity: 1 }}
+//           transition={{ duration: 0.5 }}
+//         >
+//           <img
+//             src={recipe?.images[0] || 'https://via.placeholder.com/150'}
+//             alt={recipe?.title}
+//             className="w-full h-48 object-cover mb-4 rounded-lg"
+//           />
+//           <p className="text-gray-600 mb-4">{recipe?.description}</p>
+
+//           {/* Premium check: If recipe is premium and user is not premium, show teaser */}
+//           {recipe?.premium === 'yes' && !user?.isPremium ? (
+//             <>
+//               <p className="text-red-500 mb-4">{recipe?.message}</p>
+//               <p>{recipe?.teaser}</p>
+//               <p className="text-gray-600 italic mb-6">
+//                 Subscribe to get full access to this recipe!
+//               </p>
+//               <button
+//                 onClick={() => router.push('/subscribe')}
+//                 className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-200"
+//               >
+//                 Subscribe to get full access
+//               </button>
+//             </>
+//           ) : (
+//             <>
+//               <h2 className="text-xl font-bold mb-2">Instructions</h2>
+//               <p className="text-gray-600">{recipe?.instructions}</p>
+//             </>
+//           )}
+
+//           <h3 className="text-lg font-bold mt-6 mb-2">Ingredients</h3>
+//           <ul className="list-disc list-inside">
+//             {recipe?.ingredients && recipe.ingredients.length > 0 ? (
+//               recipe.ingredients.map((ingredient, index) => (
+//                 <li key={index} className="text-gray-600">{ingredient}</li>
+//               ))
+//             ) : (
+//               <li className="text-gray-600">No ingredients listed.</li>
+//             )}
+//           </ul>
+//         </motion.div>
+
+//         {/* Comments Section */}
+//         <div className="mt-8">
+//           <h3 className="text-lg font-bold mb-4">Comments</h3>
+//           {recipe?.comments && recipe.comments.length > 0 ? (
+//             recipe.comments.map((commentObj) => (
+//               <div key={commentObj._id} className="border-b pb-2 mb-4">
+//                 <p className="text-gray-800"><strong>{commentObj.user.name}</strong></p>
+
+//                 {/* Check if the comment is being edited */}
+//                 {editingCommentId === commentObj._id ? (
+//                   <>
+//                     <textarea
+//                       value={editCommentText}
+//                       onChange={(e) => setEditCommentText(e.target.value)}
+//                       className="w-full p-2 border border-gray-300 rounded-lg"
+//                     />
+//                     <button
+//                       onClick={() => handleCommentEdit(commentObj._id)}
+//                       className="mt-2 bg-green-500 text-white py-1 px-3 rounded-lg"
+//                     >
+//                       Save
+//                     </button>
+//                     <button
+//                       onClick={() => setEditingCommentId(null)} // Cancel edit
+//                       className="mt-2 ml-2 bg-red-500 text-white py-1 px-3 rounded-lg"
+//                     >
+//                       Cancel
+//                     </button>
+//                   </>
+//                 ) : (
+//                   <>
+//                     <p className="text-gray-600">{commentObj.comment}</p>
+
+//                     {/* Only show edit button for user's own comments and check for isPremium */}
+//                     {user?.role === 'user' && user?._id === commentObj.user._id && (
+//                       (recipe?.premium === 'no' || user?.isPremium) && (
+//                         <button
+//                           onClick={() => {
+//                             setEditingCommentId(commentObj._id);
+//                             setEditCommentText(commentObj.comment); // Set current comment text for editing
+//                           }}
+//                           className="text-blue-500 mt-2"
+//                         >
+//                           Edit
+//                         </button>
+//                       )
+//                     )}
+//                   </>
+//                 )}
+//               </div>
+//             ))
+//           ) : (
+//             <p>No comments yet. Be the first to comment!</p>
+//           )}
+
+//           {/* Comment Form - Only for non-admin users */}
+//           {user?.role === 'user' && (
+//             <>
+//               {/* Non-premium users cannot comment on premium recipes */}
+//               {recipe?.premium === 'no' || user?.isPremium ? (
+//                 <form onSubmit={handleCommentSubmit} className="mt-4">
+//                   <textarea
+//                     value={comment}
+//                     onChange={(e) => setComment(e.target.value)}
+//                     className="w-full p-2 border border-gray-300 rounded-lg"
+//                     placeholder="Leave a comment"
+//                   />
+//                   <button
+//                     type="submit"
+//                     className="mt-2 bg-blue-500 text-white py-2 px-4 rounded-lg"
+//                   >
+//                     Submit Comment
+//                   </button>
+//                 </form>
+//               ) : (
+//                 <p className="text-red-500 italic">You need a premium subscription to comment on this recipe.</p>
+//               )}
+//             </>
+//           )}
+
+//           {/* Admin can't comment */}
+//           {user?.role === 'admin' && (
+//             <p className="text-gray-600 italic mt-4">
+//               Admins cannot comment on recipes.
+//             </p>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default RecipeDetailsPage;
+
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // For navigation
+import { jwtDecode } from "jwt-decode"; // Import jwt-decode
+import { motion } from "framer-motion";
+
+// Define the Recipe type
+type Recipe = {
+  _id: string;
+  title: string;
+  description: string;
+  ingredients: string[];
+  instructions: string;
+  images: string[];
+  premium: string; // yes or no
+  message?: string; // Custom message for premium
+  teaser?: string; // Teaser for premium recipes
+  comments: {
+    _id: string;
+    user: { _id: string; name: string };
+    comment: string;
+    updatedAt: string;
+  }[];
+};
+
+type User = {
+  _id: string;
+  name: string;
+  email: string;
+  role: "admin" | "user";
+  isPremium: boolean;
+};
+
+const RecipeDetailsPage = ({ params }: { params: { recipeId: string } }) => {
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [comment, setComment] = useState<string>(""); // To handle comment input
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null); // To track which comment is being edited
+  const [editCommentText, setEditCommentText] = useState<string>(""); // To handle editing comment text
 
-  // Initialize WebSocket connection
+  const router = useRouter();
+  const { recipeId } = params; // Extract recipeId from params
+
+  // Extract user info from JWT stored in localStorage
   useEffect(() => {
-    const socket = io("http://localhost:5000");
-
-    // Listen for real-time updates to comments
-    socket.on(`commentUpdated`, (updatedComment) => {
-      setComments((prevComments) =>
-        prevComments.map((comment) =>
-          comment._id === updatedComment.commentId ? updatedComment : comment
-        )
-      );
-    });
-
-    socket.on("commentDeleted", (deletedCommentId) => {
-      setComments((prevComments) =>
-        prevComments.filter((comment) => comment._id !== deletedCommentId)
-      );
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [recipeId]);
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = jwtDecode<User>(token);
+      setUser(decodedToken);
+    } else {
+      router.push("/login");
+    }
+  }, [router]);
 
   useEffect(() => {
     const fetchRecipe = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        router.push(`/login?redirect=/allrecipe/${recipeId}`);
-        return;
-      }
-
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/recipes/${recipeId}`,
+        const response = await fetch(
+          `https://recipebackend-phi.vercel.app/api/recipes/${recipeId}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           }
         );
-        setRecipe(response.data.data);
-        setComments(response.data.data.comments);
+
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(data.message || "Failed to fetch recipe");
+
+        setRecipe(data.data);
         setLoading(false);
-      } catch (error: any) {
-        if (error.response && error.response.status === 401) {
-          setError("Authentication failed, please log in again.");
-          router.push(`/login?redirect=/allrecipe/${recipeId}`);
-        } else {
-          setError("Failed to load recipe");
-        }
+      } catch {
+        setError("Failed to load recipe");
         setLoading(false);
       }
     };
 
-    if (recipeId) {
-      fetchRecipe();
-    }
-  }, [recipeId, router]);
+    if (user && recipeId) fetchRecipe();
+  }, [user, recipeId]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("You need to be logged in to comment.");
-      return;
-    }
-
-    const tempComment = {
-      _id: `temp-${Date.now()}`, // Use a temporary ID
-      comment: newComment,
-      createdAt: new Date().toISOString(),
-      user: { _id: "temp-user-id", username: "You" },
-    };
-
-    setComments((prevComments) => [...prevComments, tempComment]);
-    setNewComment("");
+    if (!comment.trim()) return alert("Comment cannot be empty");
 
     try {
-      const response = await axios.post(
-        `http://localhost:5000/api/recipes/${recipeId}/comment`,
-        { comment: newComment },
+      const response = await fetch(
+        `https://recipebackend-phi.vercel.app/api/recipes/${recipeId}/comment`,
         {
+          method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ comment }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to submit comment");
+      const updatedRecipe = await response.json();
+      setRecipe(updatedRecipe.data);
+      setComment("");
+    } catch  {
+      alert("Failed to submit comment");
+    }
+  };
+
+  const handleCommentEdit = async (commentId: string) => {
+    if (!editCommentText.trim()) return alert("Comment cannot be empty");
+
+    try {
+      const response = await fetch(
+        `https://recipebackend-phi.vercel.app/api/recipes/${recipeId}/comment/${commentId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ comment: editCommentText }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to update comment");
+      const updatedRecipe = await response.json();
+      setRecipe(updatedRecipe.data);
+      setEditingCommentId(null); // Close the edit mode
+    } catch {
+      alert("Failed to update comment");
+    }
+  };
+
+  const handleCommentDelete = async (commentId: string) => {
+    try {
+      const response = await fetch(
+        `https://recipebackend-phi.vercel.app/api/recipes/${recipeId}/comment/${commentId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
 
-      if (response.status === 200 || response.status === 201) {
-        const updatedComments = comments.filter(
-          (c) => c._id !== tempComment._id
-        );
-        const realComment = response.data.data.comments.slice(-1)[0];
-        setComments([...updatedComments, realComment]);
-      } else {
-        throw new Error("Failed to post comment.");
-      }
-    } catch (error: any) {
-      setComments((prevComments) =>
-        prevComments.filter((comment) => comment._id !== tempComment._id)
-      );
-      setError("Failed to post comment. Please try again.");
+      if (!response.ok) throw new Error("Failed to delete comment");
+      const updatedRecipe = await response.json();
+      setRecipe(updatedRecipe.data);
+    } catch  {
+      alert("Failed to delete comment");
     }
   };
-
-  const handleEditComment = (commentId: string, currentContent: string) => {
-    setEditCommentId(commentId);
-    setEditCommentContent(currentContent);
-  };
-
-  const handleUpdateComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("You need to be logged in to update a comment.");
-      return;
-    }
-
-    try {
-      // Optimistically update the comment in the UI
-      const updatedComments = comments.map((comment) =>
-        comment._id === editCommentId
-          ? { ...comment, comment: editCommentContent }
-          : comment
-      );
-      setComments(updatedComments);
-      setEditCommentId(null);
-      setEditCommentContent("");
-
-      // Send the update request to the server
-      const response = await axios.put(
-        `http://localhost:5000/api/recipes/${recipeId}/comment/${editCommentId}`,
-        { comment: editCommentContent },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Check the response status, assuming 200 is success
-      if (response.status === 200) {
-        // Successful update, do nothing extra as the UI is already updated optimistically
-        setError(null); // Clear any previous error
-      } else {
-        // Handle unexpected status codes
-        console.error("Unexpected response status:", response.status);
-        setError("Failed to update comment. Please refresh to verify.");
-      }
-    } catch (error: any) {
-      // Log the error details for debugging
-      console.error("Error updating comment:", error);
-
-      // Only set the error if there's an actual failure, not a silent issue like a network glitch
-      setError("Failed to update comment. Please refresh to verify.");
-    }
-  };
-
-  //delete
-  const handleDeleteComment = async (commentId: string) => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      setError("You need to be logged in to delete a comment.");
-      return;
-    }
-
-    // Optimistically remove the comment from the UI before the server responds
-    const updatedComments = comments.filter(
-      (comment) => comment._id !== commentId
-    );
-    setComments(updatedComments);
-
-    try {
-      const response = await axios.delete(
-        `http://localhost:5000/api/recipes/${recipeId}/comment/${commentId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        // Comment deleted successfully, you might not need to do anything here
-        setError(null); // Clear any previous error
-      } else {
-        // Handle unexpected status codes
-        console.error("Unexpected response status:", response.status);
-        setError("Failed to delete comment. Please try again.");
-        // If the delete fails, rollback the optimistic update
-        setComments([...updatedComments, ...comments]);
-      }
-    } catch (error: any) {
-      console.error("Error deleting comment:", error);
-      setError("Failed to delete comment. Please try again.");
-      // Rollback the optimistic update on failure
-      setComments([...updatedComments, ...comments]);
-    }
-  };
-
-  if (loading) return <p className="text-center text-gray-600">Loading...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="max-w-lg mx-auto my-8 p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold text-center mb-4">{recipe.title}</h1>
-      <div className="flex justify-center mb-4">
-        {recipe.images && recipe.images.length > 0 && (
-          <Image
-            src={recipe.images[0]}
-            alt={recipe.title}
-            width={400}
-            height={300}
-            className="rounded-lg shadow-md"
+    <div className="container mx-auto px-4 py-8">
+      <motion.h1
+        className="text-4xl font-bold text-center mb-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {recipe?.title}
+      </motion.h1>
+
+      <div className="bg-white shadow-md rounded-lg p-6 max-w-2xl mx-auto">
+        <motion.div
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <img
+            src={recipe?.images[0] || "https://via.placeholder.com/150"}
+            alt={recipe?.title}
+            className="w-full h-48 object-cover mb-4 rounded-lg"
           />
-        )}
-      </div>
+          <p className="text-gray-600 mb-4">{recipe?.description}</p>
 
-      {recipe.teaser ? (
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">{recipe.teaser}</p>
-          <button>
-            <p className="text-blue-500 font-semibold">
-              Subscribe to premium to see the full recipe!
-            </p>
-          </button>
-        </div>
-      ) : (
-        <div>
-          <p className="text-gray-700 text-lg mb-4">
-            <strong>Description:</strong> {recipe.description}
-          </p>
-          <p className="text-gray-600 mb-4">
-            <strong>Cooking Time:</strong> {recipe.cookingTime} minutes
-          </p>
-          <p className="text-gray-600 mb-4">
-            <strong>Tags:</strong> {recipe.tags.join(", ")}
-          </p>
-          <p className="text-gray-700 mb-4">
-            <strong>Instructions:</strong> {recipe.instructions}
-          </p>
-        </div>
-      )}
+          {/* Premium check: If recipe is premium and user is not premium, show teaser */}
+          {recipe?.premium === "yes" && !user?.isPremium ? (
+            <>
+              <p className="text-red-500 mb-4">{recipe?.message}</p>
+              <p>{recipe?.teaser}</p>
+              <p className="text-gray-600 italic mb-6">
+                Subscribe to get full access to this recipe!
+              </p>
+              <button
+                onClick={() => router.push("/subscribe")}
+                className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-200"
+              >
+                Subscribe to get full access
+              </button>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-bold mb-2">Instructions</h2>
+              <p className="text-gray-600">{recipe?.instructions}</p>
+            </>
+          )}
 
-      {/* Comments Section */}
-      <div className="comments-section mt-6">
-        <h3 className="text-2xl font-semibold mb-4">Comments</h3>
-        {recipe.isPremium && (
-          <p className="text-center text-gray-500">
-            Comments are available for premium users only.
-          </p>
-        )}
-        {!recipe.isPremium && (
-          <>
-            <div className="comments-list mb-4">
-              {Array.isArray(comments) && comments.length > 0 ? (
-                comments.map((comment) => (
-                  <div
-                    key={comment._id}
-                    className="mb-2 p-2 bg-gray-100 rounded"
-                  >
-                    {editCommentId === comment._id ? (
-                      <form onSubmit={handleUpdateComment}>
-                        <textarea
-                          value={editCommentContent}
-                          onChange={(e) =>
-                            setEditCommentContent(e.target.value)
-                          }
-                          className="w-full p-2 border rounded"
-                        />
-                        <button
-                          type="submit"
-                          className="mt-2 bg-green-500 text-white px-4 py-2 rounded"
-                        >
-                          Update
-                        </button>
-                      </form>
-                    ) : (
-                      <>
-                        <p>{comment.comment}</p>
-                        <small>
-                          {new Date(comment.createdAt).toLocaleString()} by{" "}
-                          {comment.user.name}
-                    {
-                      console.log(comment.user)
-                    }
-                        </small>
-                        {/* Edit and Delete Buttons */}
-                        <div className="mt-2">
+          <h3 className="text-lg font-bold mt-6 mb-2">Ingredients</h3>
+          <ul className="list-disc list-inside">
+            {recipe?.ingredients && recipe.ingredients.length > 0 ? (
+              recipe.ingredients.map((ingredient, index) => (
+                <li key={index} className="text-gray-600">
+                  {ingredient}
+                </li>
+              ))
+            ) : (
+              <li className="text-gray-600">No ingredients listed.</li>
+            )}
+          </ul>
+        </motion.div>
+
+        {/* Comments Section */}
+        <div className="mt-8">
+          <h3 className="text-lg font-bold mb-4">Comments</h3>
+          {recipe?.comments && recipe.comments.length > 0 ? (
+            recipe.comments.map((commentObj) => (
+              <div key={commentObj._id} className="border-b pb-2 mb-4">
+                <p className="text-gray-800">
+                  <strong>{commentObj.user.name}</strong>
+                </p>
+
+                {/* Check if the comment is being edited */}
+                {editingCommentId === commentObj._id ? (
+                  <>
+                    <textarea
+                      value={editCommentText}
+                      onChange={(e) => setEditCommentText(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                    />
+                    <button
+                      onClick={() => handleCommentEdit(commentObj._id)}
+                      className="mt-2 bg-green-500 text-white py-1 px-3 rounded-lg"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingCommentId(null)} // Cancel edit
+                      className="mt-2 ml-2 bg-red-500 text-white py-1 px-3 rounded-lg"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-gray-600">{commentObj.comment}</p>
+
+                    {/* Only show edit/delete buttons for user's own comments or admin */}
+                    {user?.role === "admin" ||
+                    user?._id === commentObj.user._id ? (
+                      <div className="flex items-center space-x-4">
+                        {(recipe?.premium === "no" || user?.isPremium) && (
                           <button
-                            onClick={() =>
-                              handleEditComment(comment._id, comment.comment)
-                            }
-                            className="text-blue-500 mr-4"
+                            onClick={() => {
+                              setEditingCommentId(commentObj._id);
+                              setEditCommentText(commentObj.comment); // Set current comment text for editing
+                            }}
+                            className="text-blue-500 mt-2"
                           >
                             Edit
                           </button>
-                          <button
-                            onClick={() => handleDeleteComment(comment._id)}
-                            className="text-red-500"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))
+                        )}
+                        <button
+                          onClick={() => handleCommentDelete(commentObj._id)}
+                          className="text-red-500 mt-2"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </div>
+            ))
+          ) : (
+            <p>No comments yet. Be the first to comment!</p>
+          )}
+
+          {/* Comment Form - Only for non-admin users */}
+          {user?.role === "user" && (
+            <>
+              {/* Non-premium users cannot comment on premium recipes */}
+              {recipe?.premium === "no" || user?.isPremium ? (
+                <form onSubmit={handleCommentSubmit} className="mt-4">
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                    placeholder="Leave a comment"
+                  />
+                  <button
+                    type="submit"
+                    className="mt-2 bg-blue-500 text-white py-2 px-4 rounded-lg"
+                  >
+                    Submit Comment
+                  </button>
+                </form>
               ) : (
-                <p className="text-center text-gray-500">
-                  No comments yet. Be the first to comment!
+                <p className="text-red-500 italic">
+                  You need a premium subscription to comment on this recipe.
                 </p>
               )}
-            </div>
-            {/* New Comment Form */}
-            <form onSubmit={handleCommentSubmit} className="mt-4">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="w-full p-2 border rounded"
-                placeholder="Add a comment..."
-                rows={3}
-              ></textarea>
-              <button
-                type="submit"
-                className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
-              >
-                Post Comment
-              </button>
-            </form>
-          </>
-        )}
+            </>
+          )}
+
+          {/* Admin can't comment */}
+          {user?.role === "admin" && (
+            <p className="text-gray-600 italic mt-4">
+              Admins cannot comment on recipes.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default RecipeDetails;
-
-
-
-
-
-
-
+export default RecipeDetailsPage;

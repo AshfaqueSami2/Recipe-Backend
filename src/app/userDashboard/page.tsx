@@ -48,7 +48,7 @@ const UserDashboard: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href={`/userDashboard/myprofile/${user._id}`}>
+                <Link href={`/userDashboard/myprofile/${user?._id}`}>
                   <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

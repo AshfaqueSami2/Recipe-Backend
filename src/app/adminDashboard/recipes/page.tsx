@@ -19,7 +19,7 @@
 //     const fetchRecipes = async () => {
 //       try {
 //         const token = localStorage.getItem('token');
-//         const response = await axios.get('http://localhost:5000/recipes', {
+//         const response = await axios.get('https://recipebackend-phi.vercel.app/recipes', {
 //           headers: {
 //             Authorization: `Bearer ${token}`,
 //           },
@@ -38,7 +38,7 @@
 //   const handleDelete = async (recipeId: string) => {
 //     try {
 //       const token = localStorage.getItem('token');
-//       await axios.delete(`http://localhost:5000/recipe/${recipeId}`, {
+//       await axios.delete(`https://recipebackend-phi.vercel.app/recipe/${recipeId}`, {
 //         headers: {
 //           Authorization: `Bearer ${token}`,
 //         },
@@ -89,10 +89,10 @@
 
 // export default RecipeList;
 
-'use client';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import Link from 'next/link';
+"use client";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Link from "next/link";
 
 type Recipe = {
   _id: string;
@@ -110,17 +110,20 @@ const RecipeList = () => {
     // Fetch all recipes from the backend
     const fetchRecipes = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/recipes', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "https://recipebackend-phi.vercel.app/recipes",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const fetchedRecipes = response.data.data;
         setRecipes(fetchedRecipes);
         setTotalRecipes(fetchedRecipes.length);
       } catch (error) {
-        console.error('Failed to fetch recipes', error);
+        console.error("Failed to fetch recipes", error);
       }
     };
 
@@ -130,33 +133,44 @@ const RecipeList = () => {
   // Toggle the published state of a recipe
   const handlePublishToggle = async (recipeId: string) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`http://localhost:5000/recipes/${recipeId}/togglePublish`, null, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setRecipes(recipes.map(recipe =>
-        recipe._id === recipeId ? { ...recipe, published: !recipe.published } : recipe
-      ));
+      const token = localStorage.getItem("token");
+      await axios.patch(
+        `https://recipebackend-phi.vercel.app/recipes/${recipeId}/togglePublish`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setRecipes(
+        recipes.map((recipe) =>
+          recipe._id === recipeId
+            ? { ...recipe, published: !recipe.published }
+            : recipe
+        )
+      );
     } catch (error) {
-      console.error('Failed to toggle publish state', error);
+      console.error("Failed to toggle publish state", error);
     }
   };
 
   // Delete a recipe
   const handleDelete = async (recipeId: string) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/recipe/${recipeId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const token = localStorage.getItem("token");
+      await axios.delete(
+        `https://recipebackend-phi.vercel.app/recipe/${recipeId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setRecipes(recipes.filter((recipe) => recipe._id !== recipeId));
       setTotalRecipes(totalRecipes - 1);
     } catch (error) {
-      console.error('Failed to delete recipe', error);
+      console.error("Failed to delete recipe", error);
     }
   };
 
@@ -165,7 +179,10 @@ const RecipeList = () => {
       <h1 className="text-2xl font-bold mb-4">All Recipes ({totalRecipes})</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {recipes.map((recipe) => (
-          <div key={recipe._id} className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div
+            key={recipe._id}
+            className="bg-white rounded-lg shadow-md overflow-hidden"
+          >
             {recipe.images && recipe.images.length > 0 && (
               <img
                 src={recipe.images[0]} // Display the first image from the images array
@@ -186,11 +203,11 @@ const RecipeList = () => {
                   onClick={() => handlePublishToggle(recipe._id)}
                   className={`${
                     recipe.published
-                      ? 'bg-yellow-500 text-white'
-                      : 'bg-green-500 text-white'
+                      ? "bg-yellow-500 text-white"
+                      : "bg-green-500 text-white"
                   } px-4 py-2 rounded hover:bg-opacity-75`}
                 >
-                  {recipe.published ? 'Unpublish' : 'Publish'}
+                  {recipe.published ? "Unpublish" : "Publish"}
                 </button>
                 <button
                   onClick={() => handleDelete(recipe._id)}

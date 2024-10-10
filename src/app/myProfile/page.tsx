@@ -1,5 +1,5 @@
 "use client";
-import { useAuth } from "@/src/utils/AuthContext";
+
 import { CameraIcon } from "@heroicons/react/16/solid";
 import React from "react";
 

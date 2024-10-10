@@ -1,765 +1,287 @@
-// 'use client';
-
-// import { useEffect, useState } from 'react';
-// import Link from 'next/link';
-
-// export default function AllRecipes() {
-//   const [recipes, setRecipes] = useState([]);
-//   const [sortByUpvotes, setSortByUpvotes] = useState(false);
-
-//   useEffect(() => {
-//     // Fetch all recipes
-//     fetchRecipes();
-//   }, [sortByUpvotes]);
-
-//   const fetchRecipes = () => {
-//     const url = sortByUpvotes
-//       ? 'http://localhost:5000/api/recipes?sort=upvotes'
-//       : 'http://localhost:5000/api/recipes';
-//     fetch(url)
-//       .then((response) => response.json())
-//       .then((data) => {
-//         console.log('Fetched Recipes Data:', data); // Log the fetched data to the console
-//         setRecipes(data.data); // Assuming the API response has a `data` field containing the recipes
-//       })
-//       .catch((error) => console.error('Error fetching recipes:', error));
-//   };
-
-//   const handleUpvote = async (recipeId) => {
-//     try {
-//       await fetch(`http://localhost:5000/api/recipes/${recipeId}/upvote`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${localStorage.getItem('token')}`, // Ensure the token is passed for authentication
-//         },
-//       });
-//       fetchRecipes(); // Refetch recipes to update the upvote count
-//     } catch (error) {
-//       console.error('Error upvoting recipe:', error);
-//     }
-//   };
-
-//   const handleDownvote = async (recipeId) => {
-//     try {
-//       await fetch(`http://localhost:5000/api/recipes/${recipeId}/downvote`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${localStorage.getItem('token')}`, // Ensure the token is passed for authentication
-//         },
-//       });
-//       fetchRecipes(); // Refetch recipes to update the downvote count
-//     } catch (error) {
-//       console.error('Error downvoting recipe:', error);
-//     }
-//   };
-
-//   const handleRating = async (recipeId, rating) => {
-//     try {
-//       await fetch(`http://localhost:5000/api/recipes/${recipeId}/rate`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${localStorage.getItem('token')}`, // Ensure the token is passed for authentication
-//         },
-//         body: JSON.stringify({ rating }),
-//       });
-//       fetchRecipes(); // Refetch recipes to update the rating
-//     } catch (error) {
-//       console.error('Error rating recipe:', error);
-//     }
-//   };
-
-//   return (
-//     <div className="container mx-auto p-6">
-//       <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">All Recipes</h1>
-
-//       {/* Sorting option */}
-//       <div className="flex justify-center mb-6">
-//         <button
-//           className={`px-6 py-2 rounded-full transition-all ${
-//             sortByUpvotes ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
-//           }`}
-//           onClick={() => setSortByUpvotes(!sortByUpvotes)}
-//         >
-//           {sortByUpvotes ? 'Sort by Default' : 'Sort by Upvotes'}
-//         </button>
-//       </div>
-
-//       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-//         {recipes.map((recipe) => (
-//           <div key={recipe._id} className="bg-white shadow-xl rounded-lg overflow-hidden transform transition duration-500 hover:scale-105">
-//             <img
-//               className="w-full h-48 object-cover"
-//               src={recipe.images[0] || 'https://via.placeholder.com/400x200'}
-//               alt={recipe.title}
-//             />
-//             <div className="p-6">
-//               <h2 className="text-2xl font-semibold mb-3 text-gray-800">{recipe.title}</h2>
-//               <p className="text-gray-600 mb-4">{recipe.description}</p>
-
-//               {/* Author info */}
-//               <div className="flex items-center mb-4">
-//                 <img
-//                   className="w-12 h-12 rounded-full border-2 border-gray-200 mr-3"
-//                   src={recipe.user?.profilePicture || 'https://via.placeholder.com/150'}
-//                   alt={recipe.user?.name || 'Unknown Author'}
-//                 />
-//                 <span className="text-gray-700 font-medium">{recipe.user?.name || 'Unknown Author'}</span>
-//               </div>
-
-//               {/* Upvote/Downvote */}
-//               <div className="flex items-center justify-between mb-4">
-//                 <button
-//                   onClick={() => handleUpvote(recipe._id)}
-//                   className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition duration-300"
-//                 >
-//                   <span>👍</span>
-//                   <span>{recipe.upvotes.length}</span>
-//                 </button>
-//                 <button
-//                   onClick={() => handleDownvote(recipe._id)}
-//                   className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300"
-//                 >
-//                   <span>👎</span>
-//                   <span>{recipe.downvotes.length}</span>
-//                 </button>
-//               </div>
-
-//               {/* Rating */}
-//               <div className="flex items-center justify-between mb-4">
-//                 <div className="flex items-center">
-//                   {[...Array(5)].map((_, index) => (
-//                     <button
-//                       key={index}
-//                       onClick={() => handleRating(recipe._id, index + 1)}
-//                       className={`text-2xl ${
-//                         index < recipe.averageRating ? 'text-yellow-500' : 'text-gray-300'
-//                       } transition duration-300 hover:text-yellow-600`}
-//                     >
-//                       ★
-//                     </button>
-//                   ))}
-//                 </div>
-//                 <span className="text-gray-600 font-medium">({recipe.averageRating.toFixed(1)})</span>
-//               </div>
-
-//               <Link
-//                 href={`/allrecipe/${recipe._id}`}
-//                 className="bg-blue-500 text-white py-3 px-6 rounded-full hover:bg-blue-600 transition duration-300 block text-center"
-//               >
-//                 View Recipe
-//               </Link>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// 'use client'
-// import { useEffect, useState } from 'react';
-// import Link from 'next/link';
-
-// export default function AllRecipes() {
-//   const [recipes, setRecipes] = useState([]);
-//   const [sortByUpvotes, setSortByUpvotes] = useState(false);
-
-//   useEffect(() => {
-//     fetchRecipes();
-//   }, [sortByUpvotes]);
-
-//   const fetchRecipes = () => {
-//     const url = sortByUpvotes
-//       ? 'http://localhost:5000/api/recipes?sort=upvotes'
-//       : 'http://localhost:5000/api/recipes';
-//     fetch(url)
-//       .then((response) => response.json())
-//       .then((data) => setRecipes(data.data))
-//       .catch((error) => console.error('Error fetching recipes:', error));
-//   };
-
-//   const handleUpvote = async (recipeId) => {
-//     try {
-//       await fetch(`http://localhost:5000/api/recipes/${recipeId}/upvote`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${localStorage.getItem('token')}`,
-//         },
-//       });
-//       fetchRecipes();
-//     } catch (error) {
-//       console.error('Error upvoting recipe:', error);
-//     }
-//   };
-
-//   const handleDownvote = async (recipeId) => {
-//     try {
-//       await fetch(`http://localhost:5000/api/recipes/${recipeId}/downvote`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${localStorage.getItem('token')}`,
-//         },
-//       });
-//       fetchRecipes();
-//     } catch (error) {
-//       console.error('Error downvoting recipe:', error);
-//     }
-//   };
-
-//   const handleRating = async (recipeId, rating) => {
-//     try {
-//       await fetch(`http://localhost:5000/api/recipes/${recipeId}/rate`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${localStorage.getItem('token')}`,
-//         },
-//         body: JSON.stringify({ rating }),
-//       });
-//       fetchRecipes();
-//     } catch (error) {
-//       console.error('Error rating recipe:', error);
-//     }
-//   };
-
-//   return (
-//     <div className="container mx-auto p-6">
-//       <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">All Recipes</h1>
-
-//       <div className="flex justify-center mb-6">
-//         <button
-//           className={`px-6 py-2 rounded-full transition-all ${sortByUpvotes ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-//           onClick={() => setSortByUpvotes(!sortByUpvotes)}
-//         >
-//           {sortByUpvotes ? 'Sort by Default' : 'Sort by Upvotes'}
-//         </button>
-//       </div>
-
-//       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-//         {recipes.map((recipe) => (
-//           <div key={recipe._id} className="bg-white shadow-xl rounded-lg overflow-hidden transform transition duration-500 hover:scale-105">
-//             <img
-//               className="w-full h-48 object-cover"
-//               src={recipe.images[0] || 'https://via.placeholder.com/400x200'}
-//               alt={recipe.title}
-//             />
-//             <div className="p-6">
-//               <h2 className="text-2xl font-semibold mb-3 text-gray-800">{recipe.title}</h2>
-//               <p className="text-gray-600 mb-4">{recipe.description}</p>
-
-//               {/* Author info */}
-//               <div className="flex items-center mb-4">
-//   {recipe.user ? (
-//     <>
-//       <Link href={`/profile/${recipe.user._id}`}>
-//         <img
-//           className="w-12 h-12 rounded-full border-2 border-gray-200 mr-3 cursor-pointer"
-//           src={recipe.user.profilePicture || 'https://via.placeholder.com/150'}
-//           alt={recipe.user.name || 'Unknown Author'}
-//         />
-//       </Link>
-//       <Link href={`/profile/${recipe.user._id}`}>
-//         <span className="text-gray-700 font-medium cursor-pointer">
-//           {recipe.user.name || 'Unknown Author'}
-//         </span>
-//       </Link>
-//     </>
-//   ) : (
-//     <span className="text-gray-700 font-medium">Unknown Author</span> // Fallback for recipes without a user
-//   )}
-// </div>
-
-
-//               {/* Upvote/Downvote */}
-//               <div className="flex items-center justify-between mb-4">
-//                 <button
-//                   onClick={() => handleUpvote(recipe._id)}
-//                   className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition duration-300"
-//                 >
-//                   <span>👍</span>
-//                   <span>{recipe.upvotes.length}</span>
-//                 </button>
-//                 <button
-//                   onClick={() => handleDownvote(recipe._id)}
-//                   className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300"
-//                 >
-//                   <span>👎</span>
-//                   <span>{recipe.downvotes.length}</span>
-//                 </button>
-//               </div>
-
-//               <div className="flex items-center justify-between mb-4">
-//                 <div className="flex items-center">
-//                   {[...Array(5)].map((_, index) => (
-//                     <button
-//                       key={index}
-//                       onClick={() => handleRating(recipe._id, index + 1)}
-//                       className={`text-2xl ${index < recipe.averageRating ? 'text-yellow-500' : 'text-gray-300'} transition duration-300 hover:text-yellow-600`}
-//                     >
-//                       ★
-//                     </button>
-//                   ))}
-//                 </div>
-//                 <span className="text-gray-600 font-medium">({recipe.averageRating.toFixed(1)})</span>
-//               </div>
-
-//               <Link
-//                 href={`/allrecipe/${recipe._id}`}
-//                 className="bg-blue-500 text-white py-3 px-6 rounded-full hover:bg-blue-600 transition duration-300 block text-center"
-//               >
-//                 View Recipe
-//               </Link>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
-// 'use client'
-// import { useEffect, useState } from 'react';
-// import Link from 'next/link';
-
-// // Define the Recipe type
-// interface Recipe {
-//   _id: string;
-//   title: string;
-//   description: string;
-//   images: string[];
-//   cookingTime: number;
-//   tags: string[];
-//   ingredients: string[];
-//   upvotes: string[]; // Array of user IDs who upvoted
-//   downvotes: string[]; // Array of user IDs who downvoted
-//   averageRating: number;
-//   user?: {
-//     _id: string;
-//     name: string;
-//     profilePicture?: string;
-//   };
-// }
-
-// export default function AllRecipes() {
-//   const [recipes, setRecipes] = useState<Recipe[]>([]);
-//   const [searchTerm, setSearchTerm] = useState('');
-//   const [sortByUpvotes, setSortByUpvotes] = useState(false);
-
-//   useEffect(() => {
-//     fetchRecipes();
-//   }, [sortByUpvotes, searchTerm]);
-
-//   const fetchRecipes = () => {
-//     const queryParams = new URLSearchParams();
-
-//     // If sorting by upvotes, add the sort parameter
-//     if (sortByUpvotes) queryParams.append('sort', 'upvotes');
-
-//     // Append the search term to the query
-//     if (searchTerm) queryParams.append('search', searchTerm);
-
-//     const url = `http://localhost:5000/api/recipes?${queryParams.toString()}`;
-
-//     fetch(url)
-//       .then((response) => response.json())
-//       .then((data) => setRecipes(data.data))
-//       .catch((error) => console.error('Error fetching recipes:', error));
-//   };
-
-//   const handleUpvote = async (recipeId: string) => {
-//     try {
-//       await fetch(`http://localhost:5000/api/recipes/${recipeId}/upvote`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${localStorage.getItem('token')}`,
-//         },
-//       });
-//       fetchRecipes();
-//     } catch (error) {
-//       console.error('Error upvoting recipe:', error);
-//     }
-//   };
-
-//   const handleDownvote = async (recipeId: string) => {
-//     try {
-//       await fetch(`http://localhost:5000/api/recipes/${recipeId}/downvote`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${localStorage.getItem('token')}`,
-//         },
-//       });
-//       fetchRecipes();
-//     } catch (error) {
-//       console.error('Error downvoting recipe:', error);
-//     }
-//   };
-
-//   const handleRating = async (recipeId: string, rating: number) => {
-//     try {
-//       await fetch(`http://localhost:5000/api/recipes/${recipeId}/rate`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${localStorage.getItem('token')}`,
-//         },
-//         body: JSON.stringify({ rating }),
-//       });
-//       fetchRecipes();
-//     } catch (error) {
-//       console.error('Error rating recipe:', error);
-//     }
-//   };
-
-//   return (
-//     <div className="container mx-auto p-6">
-//       <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">All Recipes</h1>
-
-//       {/* Search Field */}
-//       <div className="mb-6 flex justify-center">
-//         <input
-//           type="text"
-//           placeholder="Search by keywords, ingredients, cooking time, or tags"
-//           value={searchTerm}
-//           onChange={(e) => setSearchTerm(e.target.value)}
-//           className="border px-4 py-2 rounded w-full sm:w-1/2"
-//         />
-//       </div>
-
-//       <div className="flex justify-center mb-6">
-//         <button
-//           className={`px-6 py-2 rounded-full transition-all ${sortByUpvotes ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-//           onClick={() => setSortByUpvotes(!sortByUpvotes)}
-//         >
-//           {sortByUpvotes ? 'Sort by Default' : 'Sort by Upvotes'}
-//         </button>
-//       </div>
-
-//       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-//         {recipes.map((recipe) => (
-//           <div key={recipe._id} className="bg-white shadow-xl rounded-lg overflow-hidden transform transition duration-500 hover:scale-105">
-//             <img
-//               className="w-full h-48 object-cover"
-//               src={recipe.images[0] || 'https://via.placeholder.com/400x200'}
-//               alt={recipe.title}
-//             />
-//             <div className="p-6">
-//               <h2 className="text-2xl font-semibold mb-3 text-gray-800">{recipe.title}</h2>
-//               <p className="text-gray-600 mb-4">{recipe.description}</p>
-
-//               <p className="text-gray-500 mb-4">Cooking Time: {recipe.cookingTime} minutes</p>
-//               <p className="text-gray-500 mb-4">Tags: {recipe.tags.join(', ')}</p>
-//               <p className="text-gray-500 mb-4">Ingredients: {recipe.ingredients.join(', ')}</p>
-
-//               <div className="flex items-center mb-4">
-//                 {recipe.user ? (
-//                   <>
-//                     <Link href={`/profile/${recipe.user._id}`}>
-//                       <img
-//                         className="w-12 h-12 rounded-full border-2 border-gray-200 mr-3 cursor-pointer"
-//                         src={recipe.user.profilePicture || 'https://via.placeholder.com/150'}
-//                         alt={recipe.user.name || 'Unknown Author'}
-//                       />
-//                     </Link>
-//                     <Link href={`/profile/${recipe.user._id}`}>
-//                       <span className="text-gray-700 font-medium cursor-pointer">
-//                         {recipe.user.name || 'Unknown Author'}
-//                       </span>
-//                     </Link>
-//                   </>
-//                 ) : (
-//                   <span className="text-gray-700 font-medium">Unknown Author</span>
-//                 )}
-//               </div>
-
-//               <div className="flex items-center justify-between mb-4">
-//                 <button
-//                   onClick={() => handleUpvote(recipe._id)}
-//                   className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition duration-300"
-//                 >
-//                   <span>👍</span>
-//                   <span>{recipe.upvotes.length}</span>
-//                 </button>
-//                 <button
-//                   onClick={() => handleDownvote(recipe._id)}
-//                   className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300"
-//                 >
-//                   <span>👎</span>
-//                   <span>{recipe.downvotes.length}</span>
-//                 </button>
-//               </div>
-
-//               <div className="flex items-center justify-between mb-4">
-//                 <div className="flex items-center">
-//                   {[...Array(5)].map((_, index) => (
-//                     <button
-//                       key={index}
-//                       onClick={() => handleRating(recipe._id, index + 1)}
-//                       className={`text-2xl ${index < recipe.averageRating ? 'text-yellow-500' : 'text-gray-300'} transition duration-300 hover:text-yellow-600`}
-//                     >
-//                       ★
-//                     </button>
-//                   ))}
-//                 </div>
-//                 <span className="text-gray-600 font-medium">({recipe.averageRating.toFixed(1)})</span>
-//               </div>
-
-//               <Link
-//                 href={`/allrecipe/${recipe._id}`}
-//                 className="bg-blue-500 text-white py-3 px-6 rounded-full hover:bg-blue-600 transition duration-300 block text-center"
-//               >
-//                 View Recipe
-//               </Link>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-'use client';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-
-// Define the Recipe type
-interface Recipe {
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { jwtDecode } from "jwt-decode"; // Assuming you are storing JWT in localStorage
+import { FaStar } from "react-icons/fa"; // For star icons
+
+// Define types for Recipe and User
+type Recipe = {
   _id: string;
   title: string;
   description: string;
   images: string[];
-  cookingTime: number;
-  tags: string[];
-  ingredients: string[];
-  upvotes: string[]; // Array of user IDs who upvoted
-  downvotes: string[]; // Array of user IDs who downvoted
-  averageRating: number;
-  published: boolean; // New published field
-  user?: {
-    _id: string;
-    name: string;
-    profilePicture?: string;
-  };
-}
+  published: boolean;
+  upvotes: string[]; // Array of user IDs
+  downvotes: string[]; // Array of user IDs
+  averageRating: number; // Average rating for the recipe
+  ratings: { user: string; rating: number }[]; // Array of ratings by users
+  tags?: string[];
+  user?: { _id: string; name: string; profilePicture: string } | null; // User field (can be null)
+};
 
-export default function AllRecipes() {
+type User = {
+  _id: string;
+  name: string;
+  role: "admin" | "user";
+};
+
+const AllRecipesPage = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortByUpvotes, setSortByUpvotes] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [selectedRating, setSelectedRating] = useState<{
+    [key: string]: number;
+  }>({});
+
+  // Check if user is authenticated
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = jwtDecode<User>(token);
+      setUser(decodedToken);
+    }
+  }, []);
 
   useEffect(() => {
-    fetchRecipes();
-  }, [sortByUpvotes, searchTerm]);
+    const fetchRecipes = async () => {
+      try {
+        const response = await fetch(
+          "https://recipebackend-phi.vercel.app/api/recipes"
+        );
+        const data = await response.json();
 
-  const fetchRecipes = () => {
-    const queryParams = new URLSearchParams();
+        // Only keep the published recipes
+        let publishedRecipes = data.data.filter(
+          (recipe: Recipe) => recipe.published
+        );
 
-    // If sorting by upvotes, add the sort parameter
-    if (sortByUpvotes) queryParams.append('sort', 'upvotes');
+        // Sort recipes by upvotes (most upvoted first)
+        publishedRecipes = publishedRecipes.sort(
+          (a: Recipe, b: Recipe) => b.upvotes.length - a.upvotes.length
+        );
 
-    // Append the search term to the query
-    if (searchTerm) queryParams.append('search', searchTerm);
-
-    const url = `http://localhost:5000/api/recipes?${queryParams.toString()}`;
-
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        const publishedRecipes = data.data.filter((recipe: Recipe) => recipe.published); // Filter only published recipes
         setRecipes(publishedRecipes);
-      })
-      .catch((error) => console.error('Error fetching recipes:', error));
-  };
+        setLoading(false);
+      } catch {
+        setError("Failed to fetch recipes");
+        setLoading(false);
+      }
+    };
 
-  const handleUpvote = async (recipeId: string) => {
+    fetchRecipes();
+  }, []);
+
+  const handleVote = async (
+    recipeId: string,
+    voteType: "upvote" | "downvote"
+  ) => {
+    if (!user) {
+      alert("You must be logged in to vote");
+      return;
+    }
+
+    if (user.role === "admin") {
+      alert("Admins cannot vote");
+      return;
+    }
+
     try {
-      await fetch(`http://localhost:5000/api/recipes/${recipeId}/upvote`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      fetchRecipes();
-    } catch (error) {
-      console.error('Error upvoting recipe:', error);
+      const response = await fetch(
+        `https://recipebackend-phi.vercel.app/api/recipes/${recipeId}/${voteType}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to vote");
+      const updatedRecipe = await response.json();
+
+      // Update the recipe list with the new vote counts
+      setRecipes((prevRecipes) =>
+        prevRecipes
+          .map((recipe) =>
+            recipe._id === updatedRecipe.data._id
+              ? { ...updatedRecipe.data, user: recipe.user } // Retain the user info
+              : recipe
+          )
+          .sort((a, b) => b.upvotes.length - a.upvotes.length) // Keep the recipes sorted after voting
+      );
+    } catch {
+      alert("Failed to cast vote");
     }
   };
 
-  const handleDownvote = async (recipeId: string) => {
+  const handleRate = async (recipeId: string, rating: number) => {
+    if (!user) {
+      alert("You must be logged in to rate");
+      return;
+    }
+
+    if (user.role === "admin") {
+      alert("Admins cannot rate");
+      return;
+    }
+
     try {
-      await fetch(`http://localhost:5000/api/recipes/${recipeId}/downvote`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      fetchRecipes();
-    } catch (error) {
-      console.error('Error downvoting recipe:', error);
+      const response = await fetch(
+        `https://recipebackend-phi.vercel.app/api/recipes/${recipeId}/rate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ rating }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to rate recipe");
+      const updatedRecipe = await response.json();
+
+      // Update the recipe list with the new rating
+      setRecipes((prevRecipes) =>
+        prevRecipes.map((recipe) =>
+          recipe._id === updatedRecipe.data._id
+            ? { ...updatedRecipe.data, user: recipe.user } // Retain the user info
+            : recipe
+        )
+      );
+    } catch {
+      alert("Failed to submit rating");
     }
   };
 
-  const handleRating = async (recipeId: string, rating: number) => {
-    try {
-      await fetch(`http://localhost:5000/api/recipes/${recipeId}/rate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({ rating }),
-      });
-      fetchRecipes();
-    } catch (error) {
-      console.error('Error rating recipe:', error);
-    }
+  const handleStarClick = (recipeId: string, rating: number) => {
+    setSelectedRating((prevRatings) => ({
+      ...prevRatings,
+      [recipeId]: rating,
+    }));
+
+    handleRate(recipeId, rating);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="spinner"></div> {/* The spinner will be displayed while loading */}
+      </div>
+    );
+  }
+
+  if (error) return <p>{error}</p>;
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">All Recipes</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-bold text-center mb-8">All Recipes</h1>
 
-      {/* Search Field */}
-      <div className="mb-6 flex justify-center">
-        <input
-          type="text"
-          placeholder="Search by keywords, ingredients, cooking time, or tags"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="border px-4 py-2 rounded w-full sm:w-1/2"
-        />
-      </div>
-
-      <div className="flex justify-center mb-6">
-        <button
-          className={`px-6 py-2 rounded-full transition-all ${sortByUpvotes ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-          onClick={() => setSortByUpvotes(!sortByUpvotes)}
-        >
-          {sortByUpvotes ? 'Sort by Default' : 'Sort by Upvotes'}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {recipes.map((recipe) => (
-          <div key={recipe._id} className="bg-white shadow-xl rounded-lg overflow-hidden transform transition duration-500 hover:scale-105">
+          <motion.div
+            key={recipe._id}
+            className="bg-white rounded-lg shadow-lg overflow-hidden"
+            whileHover={{ scale: 1.05 }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <img
               className="w-full h-48 object-cover"
-              src={recipe.images[0] || 'https://via.placeholder.com/400x200'}
+              src={recipe.images[0] || "https://via.placeholder.com/150"}
               alt={recipe.title}
             />
-            <div className="p-6">
-              <h2 className="text-2xl font-semibold mb-3 text-gray-800">{recipe.title}</h2>
-              <p className="text-gray-600 mb-4">{recipe.description}</p>
+            <div className="p-4">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                {recipe.title}
+              </h3>
+              <p className="text-gray-600">{recipe.description}</p>
 
-              <p className="text-gray-500 mb-4">Cooking Time: {recipe.cookingTime} minutes</p>
-              <p className="text-gray-500 mb-4">Tags: {recipe.tags.join(', ')}</p>
-              <p className="text-gray-500 mb-4">Ingredients: {recipe.ingredients.join(', ')}</p>
+              {/* Display user info (profile picture and name) if user exists */}
+              {recipe.user ? (
+                <Link href={`/profile/${recipe.user._id}`}>
+                  <div className="flex items-center mt-4">
+                    <img
+                      src={recipe.user.profilePicture}
+                      alt={recipe.user.name}
+                      className="w-8 h-8 rounded-full mr-2"
+                    />
+                    <span className="text-gray-700">{recipe.user.name}</span>
+                  </div>
+                </Link>
+              ) : (
+                <p className="text-gray-500 italic">Recipe author unknown</p>
+              )}
+            </div>
 
-              <div className="flex items-center mb-4">
-                {recipe.user ? (
-                  <>
-                    <Link href={`/profile/${recipe.user._id}`}>
-                      <img
-                        className="w-12 h-12 rounded-full border-2 border-gray-200 mr-3 cursor-pointer"
-                        src={recipe.user.profilePicture || 'https://via.placeholder.com/150'}
-                        alt={recipe.user.name || 'Unknown Author'}
-                      />
-                    </Link>
-                    <Link href={`/profile/${recipe.user._id}`}>
-                      <span className="text-gray-700 font-medium cursor-pointer">
-                        {recipe.user.name || 'Unknown Author'}
-                      </span>
-                    </Link>
-                  </>
-                ) : (
-                  <span className="text-gray-700 font-medium">Unknown Author</span>
-                )}
-              </div>
+            {/* Tags */}
+            <div className="px-4 py-2">
+              {recipe.tags &&
+                recipe.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="inline-block bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full mr-2"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+            </div>
 
-              <div className="flex items-center justify-between mb-4">
+            {/* Upvote / Downvote Buttons */}
+            <div className="flex justify-between items-center px-4 py-2 bg-gray-100">
+              <div className="flex items-center space-x-2">
                 <button
-                  onClick={() => handleUpvote(recipe._id)}
-                  className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition duration-300"
+                  onClick={() => handleVote(recipe._id, "upvote")}
+                  className="bg-blue-500 text-white px-3 py-1 rounded-full hover:bg-blue-600"
                 >
-                  <span>👍</span>
-                  <span>{recipe.upvotes.length}</span>
+                  Upvote {recipe.upvotes.length}
                 </button>
                 <button
-                  onClick={() => handleDownvote(recipe._id)}
-                  className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300"
+                  onClick={() => handleVote(recipe._id, "downvote")}
+                  className="bg-red-500 text-white px-3 py-1 rounded-full hover:bg-red-600"
                 >
-                  <span>👎</span>
-                  <span>{recipe.downvotes.length}</span>
+                  Downvote {recipe.downvotes.length}
                 </button>
               </div>
-
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleRating(recipe._id, index + 1)}
-                      className={`text-2xl ${index < recipe.averageRating ? 'text-yellow-500' : 'text-gray-300'} transition duration-300 hover:text-yellow-600`}
-                    >
-                      ★
-                    </button>
-                  ))}
-                </div>
-                <span className="text-gray-600 font-medium">({recipe.averageRating.toFixed(1)})</span>
-              </div>
-
               <Link
                 href={`/allrecipe/${recipe._id}`}
-                className="bg-blue-500 text-white py-3 px-6 rounded-full hover:bg-blue-600 transition duration-300 block text-center"
+                className="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 transition duration-300"
               >
                 View Recipe
               </Link>
             </div>
-          </div>
+
+            {/* Rating Section */}
+            <div className="p-4">
+              <p className="text-gray-600 mb-2">
+                Average Rating: {recipe.averageRating.toFixed(1)} / 5
+              </p>
+
+              <div className="flex space-x-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <FaStar
+                    key={star}
+                    size={20}
+                    color={selectedRating[recipe._id] >= star ? "gold" : "gray"}
+                    onClick={() => handleStarClick(recipe._id, star)}
+                    className={`cursor-pointer ${
+                      !user || user.role === "admin"
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
         ))}
       </div>
     </div>
   );
-}
+};
+
+export default AllRecipesPage;

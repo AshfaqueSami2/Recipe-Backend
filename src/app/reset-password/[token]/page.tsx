@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -31,26 +31,32 @@ const ResetPassword: React.FC<ResetPasswordPageProps> = ({ params }) => {
     setLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/auth/reset-password/${token}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ newPassword }),
-      });
+      const response = await fetch(
+        `https://recipebackend-phi.vercel.app/api/auth/reset-password/${token}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ newPassword }),
+        }
+      );
 
       if (!response.ok) {
         const text = await response.text();
         throw new Error(`Request failed with status ${response.status}: ${text}`);
       }
 
-      const result = await response.json(); // Parse JSON only if response is OK
       toast.success("Password reset successful! Redirecting to login...");
       router.push("/login");
-    } catch (error: any) {
-      console.error("Error:", error);
-      setError(error.message || "An error occurred during password reset.");
-      toast.error(error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message || "An error occurred during password reset.");
+        toast.error(error.message);
+      } else {
+        setError("An unexpected error occurred.");
+        toast.error("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }

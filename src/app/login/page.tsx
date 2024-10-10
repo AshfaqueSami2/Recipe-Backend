@@ -17,7 +17,7 @@
 //     setError(null);
 
 //     try {
-//       const response = await fetch("http://localhost:5000/api/auth/login", {
+//       const response = await fetch("https://recipebackend-phi.vercel.app/api/auth/login", {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -91,7 +91,7 @@
 //               <input
 //                 type="password"
 //                 placeholder="Enter Password"
-              
+
 //                 className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
 //                 value={password}
 //                 onChange={(e) => setPassword(e.target.value)}
@@ -128,9 +128,7 @@
 // };
 
 // export default Login;
-
-
-'use client';
+"use client";
 
 import loginBanner from "./../../assets/pexels-photo-1640777.jpeg";
 import { useAuth } from "@/src/utils/AuthContext";
@@ -152,13 +150,16 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        "https://recipebackend-phi.vercel.app/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const result = await response.json();
 
@@ -183,10 +184,14 @@ const Login: React.FC = () => {
       } else {
         throw new Error("Missing token or role in the response");
       }
-    } catch (error: any) {
-      console.log(error);
-      setError(error.message || "An error occurred during login.");
-      toast.error(error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message || "An error occurred during login.");
+        toast.error(error.message);
+      } else {
+        setError("An unexpected error occurred.");
+        toast.error("An unexpected error occurred.");
+      }
     }
   };
 
@@ -239,7 +244,10 @@ const Login: React.FC = () => {
             </div>
 
             <div className="text-right mt-2">
-              <Link href="/forgot-password" className="text-sm font-semibold text-gray-700 hover:text-blue-700">
+              <Link
+                href="/forgot-password"
+                className="text-sm font-semibold text-gray-700 hover:text-blue-700"
+              >
                 Forgot Password?
               </Link>
             </div>
@@ -256,7 +264,10 @@ const Login: React.FC = () => {
 
           <p className="mt-8">
             Need an account?{" "}
-            <Link href="/register" className="text-blue-500 hover:text-blue-700 font-semibold">
+            <Link
+              href="/register"
+              className="text-blue-500 hover:text-blue-700 font-semibold"
+            >
               Create an account
             </Link>
           </p>

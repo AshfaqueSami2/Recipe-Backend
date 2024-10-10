@@ -6,7 +6,7 @@ import Link from "next/link";
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth(); // Get the user's role from the context
-
+  
   return (
     <PrivateRoute allowedRoles={["admin"]}>
       {" "}
@@ -50,7 +50,7 @@ const AdminDashboard: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href={`/adminDashboard/profile`}>
+                <Link href={`/adminDashboard/myprofile/${user?._id}`}>
                   <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

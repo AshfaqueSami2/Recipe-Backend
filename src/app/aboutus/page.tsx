@@ -34,7 +34,7 @@ const AboutUs = () => {
                   About Sam Recipe
                 </h2>
                 <p className="font-normal text-xl leading-8 text-gray-500 max-lg:text-center max-w-2xl mx-auto">
-                  At <span style={{ color: "#D54215", fontWeight: "bold" }}>Sam Recipe</span>, we're committed to bringing world-class culinary experiences right to your kitchen. Our expertly curated recipes are designed for everyone, from beginners to seasoned chefs. Whether you're creating a quick meal or hosting a grand feast, Sam Recipe ensures that every dish is delicious, nutritious, and easy to prepare.
+                  At <span style={{ color: "#D54215", fontWeight: "bold" }}>Sam Recipe</span>, were committed to bringing world-class culinary experiences right to your kitchen. Our expertly curated recipes are designed for everyone, from beginners to seasoned chefs. Whether youre creating a quick meal or hosting a grand feast, Sam Recipe ensures that every dish is delicious, nutritious, and easy to prepare.
                 </p>
               </div>
             </div>
@@ -52,7 +52,7 @@ const AboutUs = () => {
             {/* Testimonial 1 */}
             <div className="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition duration-300 border border-transparent hover:border-[#D54215]">
               <p className="text-gray-700 mb-6">
-                Sam Recipe made cooking fun for me again. The instructions are so clear, and the ingredients are easy to find. I've become a much better cook!
+                Sam Recipe made cooking fun for me again. The instructions are so clear, and the ingredients are easy to find. Ive become a much better cook!
               </p>
               <div className="flex items-center">
                 <img
@@ -204,7 +204,7 @@ const AboutUs = () => {
                     Recipes Available
                   </h4>
                   <p className="text-xs text-gray-500 leading-5">
-                    We've curated over 500 recipes to ensure you always find something new and exciting to cook.
+                    Weve curated over 500 recipes to ensure you always find something new and exciting to cook.
                   </p>
                 </div>
               </div>
@@ -223,7 +223,7 @@ const AboutUs = () => {
                 Get In Touch with Sam Recipe
               </h2>
               <p className="text-gray-600 text-lg font-normal leading-7 mb-7 md:text-left text-center">
-                Have any questions or feedback? We're here to help you make the most out of every recipe.
+                Have any questions or feedback? Were here to help you make the most out of every recipe.
               </p>
               <div className="flex md:items-center md:justify-start justify-center">
                 <button className="w-36 h-12 rounded-full" style={{ backgroundColor: "#D54215" }}>

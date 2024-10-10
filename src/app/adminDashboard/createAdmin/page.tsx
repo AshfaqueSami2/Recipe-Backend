@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { redirect } from 'next/navigation';
-import toast, { Toaster } from 'react-hot-toast'; // Import react-hot-toast
+import React, { useState } from "react";
+import { redirect } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
 
 const CreateAdminPage = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phone: '',
-    address: '',
-    profilePicture: '',
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    address: "",
+    profilePicture: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,52 +25,60 @@ const CreateAdminPage = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          role: 'admin', // Set the role to admin by default
-        }),
-      });
+      const response = await fetch(
+        "https://recipebackend-phi.vercel.app/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            role: "admin", // Set the role to admin by default
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('Admin created successfully!'); // Show success toast
+        toast.success("Admin created successfully!"); // Show success toast
         setFormData({
-          name: '',
-          email: '',
-          password: '',
-          phone: '',
-          address: '',
-          profilePicture: '',
+          name: "",
+          email: "",
+          password: "",
+          phone: "",
+          address: "",
+          profilePicture: "",
         });
 
         // Redirect to another page after success
         setTimeout(() => {
-          redirect('/adminDashboard/users'); // Redirect after toast
+          redirect("/adminDashboard/users"); // Redirect after toast
         }, 2000); // Slight delay to show the toast
       } else {
-        toast.error(data.message || 'Something went wrong'); // Show error toast
+        toast.error(data.message || "Something went wrong"); // Show error toast
       }
     } catch (error) {
-      console.error('Error creating admin:', error);
-      toast.error('An error occurred while creating the admin.');
+      console.error("Error creating admin:", error);
+      toast.error("An error occurred while creating the admin.");
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-500 to-blue-600 p-8">
-      <Toaster position="top-right" reverseOrder={false} /> {/* Add Toaster for displaying toast */}
+      <Toaster position="top-right" reverseOrder={false} />{" "}
+      {/* Add Toaster for displaying toast */}
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Create Admin</h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Create Admin
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Name
+            </label>
             <input
               type="text"
               name="name"
@@ -82,7 +90,9 @@ const CreateAdminPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <input
               type="email"
               name="email"
@@ -94,7 +104,9 @@ const CreateAdminPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <input
               type="password"
               name="password"
@@ -106,7 +118,9 @@ const CreateAdminPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Phone Number
+            </label>
             <input
               type="text"
               name="phone"
@@ -118,7 +132,9 @@ const CreateAdminPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Address</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Address
+            </label>
             <input
               type="text"
               name="address"
@@ -130,7 +146,9 @@ const CreateAdminPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Profile Picture (URL)</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Profile Picture (URL)
+            </label>
             <input
               type="url"
               name="profilePicture"

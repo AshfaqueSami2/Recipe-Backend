@@ -9,8 +9,6 @@
 // // Dynamically import React Quill to prevent SSR issues
 // const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
-
-
 // const CreateRecipe: React.FC = () => {
 //   const router = useRouter();
 
@@ -39,7 +37,7 @@
 //     };
 
 //     try {
-//       const response = await fetch("http://localhost:5000/api/recipes/", {
+//       const response = await fetch("https://recipebackend-phi.vercel.app/api/recipes/", {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -270,10 +268,6 @@
 
 // export default CreateRecipe;
 
-
-
-
-
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Use the new router
@@ -287,7 +281,7 @@ const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 const CreateRecipe: React.FC = () => {
   const router = useRouter();
-  
+
   // Optional: If using an Auth context, otherwise retrieve the role from localStorage
   const { user } = useAuth(); // Assuming this contains user info with role
 
@@ -305,7 +299,7 @@ const CreateRecipe: React.FC = () => {
     e.preventDefault();
 
     // Strip HTML tags from the description to store it as plain text
-    const plainTextDescription = description.replace(/<[^>]+>/g, ''); 
+    const plainTextDescription = description.replace(/<[^>]+>/g, "");
 
     const recipeData = {
       title,
@@ -319,14 +313,17 @@ const CreateRecipe: React.FC = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/recipes/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Adjust based on your token storage
-        },
-        body: JSON.stringify(recipeData),
-      });
+      const response = await fetch(
+        "https://recipebackend-phi.vercel.app/api/recipes/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Adjust based on your token storage
+          },
+          body: JSON.stringify(recipeData),
+        }
+      );
 
       if (response.ok) {
         toast.success("Recipe created successfully!");
@@ -341,7 +338,7 @@ const CreateRecipe: React.FC = () => {
       } else {
         toast.error("Failed to create recipe.");
       }
-    } catch (error) {
+    } catch  {
       toast.error("An error occurred. Please try again.");
     }
   };
@@ -417,9 +414,7 @@ const CreateRecipe: React.FC = () => {
                 type="text"
                 className="w-full p-2 border border-gray-300 rounded-lg"
                 value={ingredient}
-                onChange={(e) =>
-                  handleIngredientChange(index, e.target.value)
-                }
+                onChange={(e) => handleIngredientChange(index, e.target.value)}
                 required
               />
               <button

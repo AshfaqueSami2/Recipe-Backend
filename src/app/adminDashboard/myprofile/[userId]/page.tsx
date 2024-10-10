@@ -1,31 +1,31 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import {jwtDecode} from "jwt-decode"; // No destructuring needed
+import {jwtDecode} from "jwt-decode"; // Import jwtDecode without destructuring
+import { useRouter } from "next/navigation"; // use 'next/navigation' in Next.js 13
 import PrivateRoute from "@/src/utils/privateRoute";
 
-// Define the structure of the user object from the token and the profile
-interface User {
+// Define the User type
+type User = {
   id: string;
   name: string;
   email: string;
+  role: string;
   bio?: string;
   profilePicture?: string;
-  role: string;
   phone?: string;
-  followers?:  string[]; // If applicable
-  following?: string[]; // If applicable
-}
+};
 
-interface DecodedToken {
+// Define the structure of the decoded JWT token
+type DecodedToken = {
   id: string;
-  // Add other fields that are present in your token, if needed
-}
+  exp: number;
+};
 
 const ProfilePage = ({ params }: { params: { userId: string } }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null); // Allow null as an initial value
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -47,7 +47,7 @@ const ProfilePage = ({ params }: { params: { userId: string } }) => {
       return;
     }
 
-    const decodedToken: DecodedToken = jwtDecode<DecodedToken>(token); // Decoding the token with correct type
+    const decodedToken: DecodedToken = jwtDecode(token);
     const loggedInUserId = decodedToken.id;
 
     // Prevent access to other users' profiles
@@ -70,7 +70,8 @@ const ProfilePage = ({ params }: { params: { userId: string } }) => {
           profilePicture: data.data.profilePicture || "",
         });
         setLoading(false);
-      } catch {
+      } catch (error) {
+        console.error("Failed to load user profile:", error); // Log the error for debugging
         setError("Failed to load user profile");
         setLoading(false);
       }
@@ -107,7 +108,8 @@ const ProfilePage = ({ params }: { params: { userId: string } }) => {
 
       // Show success toast
       toast.success("Profile updated successfully!");
-    } catch {
+    } catch (error) {
+      console.error("Failed to update user profile:", error); // Log for debugging
       setError("Failed to update user profile");
     }
   };
@@ -115,9 +117,11 @@ const ProfilePage = ({ params }: { params: { userId: string } }) => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
+  // Ensure user is not null before rendering the profile details
   return (
-    <PrivateRoute allowedRoles={["user"]}>
+    <PrivateRoute allowedRoles={["admin"]}>
       <div className="container mx-auto px-4 py-8">
+        {/* Hot Toast notification */}
         <Toaster position="top-right" reverseOrder={false} />
 
         <motion.h1
@@ -158,12 +162,6 @@ const ProfilePage = ({ params }: { params: { userId: string } }) => {
                   </p>
                   <p>
                     <strong>Phone:</strong> {user.phone || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Followers:</strong> {user.followers?.length || 0}
-                  </p>
-                  <p>
-                    <strong>Following:</strong> {user.following?.length || 0}
                   </p>
                 </div>
               </div>

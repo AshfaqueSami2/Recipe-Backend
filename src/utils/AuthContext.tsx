@@ -80,21 +80,24 @@
 //   return context;
 // };
 
-
-
-
 "use client";
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 
 // Define the UserType with all the properties you want to store
 type UserType = {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   address?: string;
   phone?: string;
-  role:string;
+  role: string;
   bio?: string;
   profilePicture: string | null;
 };
@@ -112,7 +115,9 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // AuthProvider component to wrap the application
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -133,28 +138,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(false);
   }, []);
 
-
-
-// Function to fetch latest user data from the backend
-const fetchUserData = async (userId: string) => {
-  try {
-    const response = await fetch(`http://localhost:5000/api/user/${userId}`);
-    const data = await response.json();
-    if (response.ok) {
-      setUser(data.user); // Update the user in context
-      localStorage.setItem("user", JSON.stringify(data.user)); // Update localStorage
-    } else {
-      console.error("Failed to fetch user data");
+  // Function to fetch latest user data from the backend
+  const fetchUserData = async (userId: string) => {
+    try {
+      const response = await fetch(
+        `https://recipebackend-phi.vercel.app/api/user/${userId}`
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setUser(data.user); // Update the user in context
+        localStorage.setItem("user", JSON.stringify(data.user)); // Update localStorage
+      } else {
+        console.error("Failed to fetch user data");
+      }
+    } catch (error) {
+      console.error("Error fetching user data", error);
     }
-  } catch (error) {
-    console.error("Error fetching user data", error);
-  }
-};
-
-
-
-
-
+  };
 
   // Login function to set the token and user data in localStorage and state
   const logIn = (token: string, userData: UserType) => {
@@ -184,7 +184,9 @@ const fetchUserData = async (userId: string) => {
 
   // Provide the AuthContext to children components
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, logIn, logOut,fetchUserData  }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, user, logIn, logOut, fetchUserData }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );
