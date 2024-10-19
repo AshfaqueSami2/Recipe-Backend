@@ -30,7 +30,7 @@ Ensure you have the following installed on your system:
 
 ### Backend Link
 ```
-git clone https://github.com/AshfaqueSami2/Recipe-Share-Backend/
+[ https://github.com/AshfaqueSami2/Recipe-Share-Backend/]
 
 ```
 
